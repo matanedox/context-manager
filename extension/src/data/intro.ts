@@ -5,13 +5,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { checkHooks } from "./hooks-install";
-import {
-  discoverPersonas,
-  guideDismissed,
-  isGuide,
-  personaDisplayName,
-  type Persona,
-} from "./personas";
+import { discoverPersonas, guideDismissed, isGuide, personaDisplayName, type Persona } from "./personas";
 import { runtimeDir } from "./runtime-dir";
 
 /** A preference, not session state: it has to survive the purge that runs when a session closes. */
@@ -54,11 +48,7 @@ function markShown(root: string): boolean {
  */
 export function walkthroughDue(root: string | undefined): boolean {
   const due =
-    !walkthroughOffered &&
-    !!root &&
-    !fs.existsSync(marker(root)) &&
-    !guideDismissed(root) &&
-    checkHooks(root).ready;
+    !walkthroughOffered && !!root && !fs.existsSync(marker(root)) && !guideDismissed(root) && checkHooks(root).ready;
   if (!due) return false;
   walkthroughOffered = true;
   introPending = markShown(root);

@@ -36,22 +36,20 @@ function renderContextMeter(payload) {
   paint(help, help.hidden ? "" : HELP_PARAGRAPHS.map((text) => `<p>${text}</p>`).join(""));
   meter.className = `context-meter${reading?.overLimit ? " over" : ""}`;
   const bar =
-    reading?.fill != null
-      ? `<span class="context-meter-track"><span class="context-meter-fill"></span></span>`
-      : "";
+    reading?.fill != null ? `<span class="context-meter-track"><span class="context-meter-fill"></span></span>` : "";
   const label = reading ? reading.label : "No context reported yet";
   const limit = payload.canSetLimit
     ? `<label class="context-limit" title="Cap spend for this chat: 80k or 5M. Blank for none.">
         <span>Limit</span>
         <input type="text" spellcheck="false" autocomplete="off" data-session-limit="${escapeHtml(
-          payload.selectedConversationId ?? ""
+          payload.selectedConversationId ?? "",
         )}" value="${escapeHtml(
-          payload.contextLimitField ?? ""
+          payload.contextLimitField ?? "",
         )}" placeholder="—" aria-label="Token limit for this chat, for example 80k or 5M" />
       </label>
       <label class="context-auto" title="When this chat passes its limit, open a fresh session briefed on it.">
         <input type="checkbox" data-auto-continue="${escapeHtml(
-          payload.selectedConversationId ?? ""
+          payload.selectedConversationId ?? "",
         )}" ${payload.autoContinueOnLimit ? "checked" : ""} ${
           payload.contextLimitField != null ? "" : "disabled"
         } aria-label="Continue automatically in a fresh session at the limit" />
@@ -70,9 +68,9 @@ function renderContextMeter(payload) {
     full,
     reading?.overLimit
       ? `<span>This session is over its limit — ${escapeHtml(
-          reading.short
+          reading.short,
         )} spent. A fresh chat starts the same persona from zero, briefed on this one.</span>
          <button type="button" data-continue-session>Continue in a fresh session</button>`
-      : ""
+      : "",
   );
 }

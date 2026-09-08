@@ -9,16 +9,11 @@ import { contextMeter, contextSummary } from "../../present/copy";
 import { personaName } from "../../present/persona";
 
 export type OpenChoice =
-  | { open: "new"; note?: string }
-  | { open: "existing"; conversationId: string }
-  | { open: "cancel" };
+  { open: "new"; note?: string } | { open: "existing"; conversationId: string } | { open: "cancel" };
 
 function personaLabel(snapshot: BoardSnapshot, role: Role): string {
   const persona = snapshot.context.personas.find((entry) => entry.id === role);
-  return (
-    personaName(role, persona ? personaDisplayName(persona) : undefined) ??
-    roleLabel(role, persona?.title)
-  );
+  return personaName(role, persona ? personaDisplayName(persona) : undefined) ?? roleLabel(role, persona?.title);
 }
 
 /**
@@ -28,7 +23,7 @@ function personaLabel(snapshot: BoardSnapshot, role: Role): string {
 export async function confirmSecondSession(
   snapshot: BoardSnapshot,
   role: Role,
-  usingDemo: boolean
+  usingDemo: boolean,
 ): Promise<OpenChoice> {
   const open = usingDemo ? [] : openSessionsForRole(snapshot.state.sessions, role);
   if (!open.length) return { open: "new" };
@@ -44,10 +39,13 @@ export async function confirmSecondSession(
     },
     briefed,
     clean,
-    existing
+    existing,
   );
   if (pick === briefed) {
-    return { open: "new", note: continuationBrief(snapshot, open[0].conversationId, "sibling")?.text };
+    return {
+      open: "new",
+      note: continuationBrief(snapshot, open[0].conversationId, "sibling")?.text,
+    };
   }
   if (pick === clean) return { open: "new" };
   if (pick === existing) return { open: "existing", conversationId: open[0].conversationId };
@@ -59,7 +57,7 @@ export function continuationBrief(
   snapshot: BoardSnapshot,
   conversationId: string,
   kind: "full" | "sibling",
-  recap?: string
+  recap?: string,
 ): { role: Role; text: string } | undefined {
   const session = snapshot.state.sessions.find((row) => row.conversationId === conversationId);
   if (!session?.role) return undefined;

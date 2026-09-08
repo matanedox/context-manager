@@ -72,7 +72,7 @@ export function readHandoffs(root: string | undefined): ContextHandoff[] {
 /** A note is written unread; the persona hook marks it read once it reaches the target chat. */
 export function appendHandoff(
   root: string | undefined,
-  entry: Omit<ContextHandoff, "id" | "ts" | "read">
+  entry: Omit<ContextHandoff, "id" | "ts" | "read">,
 ): ContextHandoff | null {
   if (!root || !entry.text.trim()) return null;
   const row: ContextHandoff = {
@@ -103,7 +103,7 @@ function targetsMatch(a: HandoffTarget, b: HandoffTarget): boolean {
 function lastNoteBetween(
   handoffs: ContextHandoff[],
   fromConversationId: string,
-  to: HandoffTarget
+  to: HandoffTarget,
 ): { note: ContextHandoff; incoming: boolean } | undefined {
   for (let i = handoffs.length - 1; i >= 0; i--) {
     const row = handoffs[i];
@@ -129,7 +129,7 @@ export function collaboratorsFor(
   selected: SessionSlice,
   openSessions: Array<{ conversationId: string; role: Role | null; status: string }>,
   handoffs: ContextHandoff[],
-  labels: Record<Role, string>
+  labels: Record<Role, string>,
 ): Collaborator[] {
   const out: Collaborator[] = [];
   const seen = new Set<string>();

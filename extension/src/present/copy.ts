@@ -50,13 +50,9 @@ export type ContextMeter = {
   fill?: number;
 };
 
-export function contextMeter(
-  summary: ContextSummary,
-  limitTokens?: number
-): ContextMeter | undefined {
+export function contextMeter(summary: ContextSummary, limitTokens?: number): ContextMeter | undefined {
   if (summary.inputTokens === undefined) return undefined;
-  const cached =
-    summary.cachedShare !== undefined ? ` · ${Math.round(summary.cachedShare * 100)}% cached` : "";
+  const cached = summary.cachedShare !== undefined ? ` · ${Math.round(summary.cachedShare * 100)}% cached` : "";
   const size = formatTokens(summary.inputTokens);
   if (limitTokens == null || limitTokens <= 0) {
     return { label: `${size}${cached}`, short: size, overLimit: false };
@@ -95,8 +91,7 @@ export function contextSummary(events: HookEvent[]): ContextSummary {
       if (typeof raw.cache_read_tokens === "number") cacheRead += raw.cache_read_tokens;
     }
     if (kind === "sessionEnd") {
-      summary.endReason =
-        raw.final_status && raw.final_status !== "none" ? raw.final_status : raw.reason;
+      summary.endReason = raw.final_status && raw.final_status !== "none" ? raw.final_status : raw.reason;
     }
   }
   summary.files = [...files].slice(-6);
@@ -141,7 +136,7 @@ export function activityDescription(
   event: HookEvent,
   parent: Role,
   roleMap: Record<string, string>,
-  names: Partial<Record<Role, string>> = {}
+  names: Partial<Record<Role, string>> = {},
 ): string {
   const kind = eventType(event);
   const type = subagentType(event);
@@ -164,9 +159,7 @@ export function activityDescription(
   if (kind === "afterAgentResponse") return `${actorName(parent)} finished responding`;
   if (kind === "sessionEnd") {
     const reason = event.raw?.reason;
-    return `${actorName(parent)} session ended${
-      reason ? ` (${reason.replace(/_/g, " ")})` : ""
-    }`;
+    return `${actorName(parent)} session ended${reason ? ` (${reason.replace(/_/g, " ")})` : ""}`;
   }
   if ((kind === "postToolUse" || kind === "preToolUse") && tool) {
     const file = touchedFile(event);

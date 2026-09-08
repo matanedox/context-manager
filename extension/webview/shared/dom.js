@@ -37,16 +37,13 @@ function paint(el, html) {
 function escapeHtml(value) {
   return String(value).replace(
     /[&<>"']/g,
-    (char) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]
+    (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char],
   );
 }
 
 function sessionStatus(loading, session, loadTarget) {
   const active =
-    loading &&
-    loadTarget !== null &&
-    (session.pending ? loadTarget === "" : session.conversationId === loadTarget);
+    loading && loadTarget !== null && (session.pending ? loadTarget === "" : session.conversationId === loadTarget);
   return `<span class="session-status${active ? " loading" : ""}" aria-hidden="true"></span>`;
 }
 
@@ -58,8 +55,7 @@ function sessionLoadTarget(loading, sessions) {
 
 function personaLabels(item) {
   const roleLabel = item.roleLabel ?? item.label ?? item.role ?? "";
-  const name =
-    item.name ?? (item.label && item.label !== roleLabel ? item.label : undefined);
+  const name = item.name ?? (item.label && item.label !== roleLabel ? item.label : undefined);
   return { roleLabel, name };
 }
 
@@ -72,11 +68,8 @@ function personaFigureCopy(item) {
 
 function sessionPersonaCopy(session) {
   const { roleLabel, name } = personaLabels(session);
-  const ordinal =
-    session.showInstance && session.instanceIndex ? ` · ${session.instanceIndex}` : "";
-  const sub = name
-    ? `<small class="session-name">${escapeHtml(name)}${escapeHtml(ordinal)}</small>`
-    : "";
+  const ordinal = session.showInstance && session.instanceIndex ? ` · ${session.instanceIndex}` : "";
+  const sub = name ? `<small class="session-name">${escapeHtml(name)}${escapeHtml(ordinal)}</small>` : "";
   return `<strong>${escapeHtml(roleLabel)}${name ? "" : escapeHtml(ordinal)}</strong>${sub}`;
 }
 

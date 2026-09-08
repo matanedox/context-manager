@@ -31,7 +31,7 @@ export function runChatTask<T>(fn: () => Promise<T>): Promise<T> {
   const task = serial.then(fn);
   serial = task.then(
     () => undefined,
-    () => undefined
+    () => undefined,
   );
   return task;
 }
@@ -55,11 +55,7 @@ export function scheduleOpenChat(conversationId: string): void {
  * `prefill` is left sitting in the new chat's input for the user to send: Cursor only submits a
  * composer's text when the create asks it to, so the board never speaks for the user.
  */
-export async function newChat(
-  background = false,
-  prefill?: string,
-  replaceTab = false
-): Promise<boolean> {
+export async function newChat(background = false, prefill?: string, replaceTab = false): Promise<boolean> {
   // Cursor's default create command replaces the selected tab, which fires sessionEnd even
   // when that chat is still working. With hooks, create off-screen and reveal it only after
   // the extension has bound its persona context.
@@ -101,10 +97,7 @@ export async function chatIds(): Promise<string[]> {
  * Identify the chat Cursor just created by watching its open chats, so a session no longer
  * depends on a sessionStart hook the board cannot verify.
  */
-export async function waitForNewChat(
-  before: Set<string>,
-  timeoutMs = 5000
-): Promise<string | undefined> {
+export async function waitForNewChat(before: Set<string>, timeoutMs = 5000): Promise<string | undefined> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const found = (await chatIds()).find((id) => !before.has(id));
@@ -125,11 +118,7 @@ async function chatReady(conversationId: string, timeoutMs = 2000): Promise<bool
   return false;
 }
 
-const ATTACH_FILE = [
-  "composer.addfilestocomposer",
-  "composer.addFilesToComposer",
-  "composer.addFilesToContext",
-];
+const ATTACH_FILE = ["composer.addfilestocomposer", "composer.addFilesToComposer", "composer.addFilesToContext"];
 
 /**
  * Switch Cursor to this chat and put the caret back in its composer. focusComposer falls back to
@@ -166,7 +155,7 @@ export async function attachFileToChat(conversationId: string, filePath: string)
   const mention = `@${path.basename(filePath)}`;
   await vscode.env.clipboard.writeText(mention);
   void vscode.window.showInformationMessage(
-    `Could not attach automatically. Copied ${mention} — paste it in the chat.`
+    `Could not attach automatically. Copied ${mention} — paste it in the chat.`,
   );
   return false;
 }

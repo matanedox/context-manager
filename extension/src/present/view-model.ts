@@ -55,11 +55,7 @@ export function viewModel(snapshot: BoardSnapshot, ui: BoardUi): ViewModel {
   const labeled = (id: Role | null) => {
     const role = id ?? GUIDE_PERSONA.id;
     const entry = context.personas.find((persona) => persona.id === role);
-    return personaDisplay(
-      role,
-      personaName(role, entry ? personaDisplayName(entry) : undefined),
-      entry?.title
-    );
+    return personaDisplay(role, personaName(role, entry ? personaDisplayName(entry) : undefined), entry?.title);
   };
   const pendingRow: SessionRow[] =
     state.pendingRole && !openSessions.some((session) => session.role === state.pendingRole)
@@ -81,34 +77,34 @@ export function viewModel(snapshot: BoardSnapshot, ui: BoardUi): ViewModel {
     banner: usingDemo
       ? "Seeded board (demo). Live hooks replace this when events.jsonl has data."
       : `Live hook log · ${personaNote(context)}${
-          snapshot.hookCheck.ready
-            ? ""
-            : " · hooks not installed: chats cannot see their persona"
+          snapshot.hookCheck.ready ? "" : " · hooks not installed: chats cannot see their persona"
         }`,
     edges: [],
     // The seeded log names no chat Cursor can open or archive, so its rows are left out entirely:
     // a row that answers neither a click nor its own × is worse than an empty rail.
-    sessions: usingDemo ? [] : [
-      ...pendingRow,
-      ...openSessions.map((session) => {
-        const events = state.eventsByConversation.get(session.conversationId) ?? [];
-        const meter = contextMeter(contextSummary(events), session.contextLimitTokens);
-        return {
-          conversationId: session.conversationId,
-          ...labeled(session.role),
-          status: session.status,
-          shortId: session.conversationId.slice(0, 6),
-          when: relativeTime(events[events.length - 1]?.ts, ui.now),
-          active: session.conversationId === selected?.conversationId,
-          working: session.status === "working",
-          pending: false,
-          instanceIndex: session.instanceIndex,
-          showInstance: showSessionInstance(session, openSessions),
-          context: meter?.short,
-          contextOver: meter?.overLimit,
-        };
-      }),
-    ],
+    sessions: usingDemo
+      ? []
+      : [
+          ...pendingRow,
+          ...openSessions.map((session) => {
+            const events = state.eventsByConversation.get(session.conversationId) ?? [];
+            const meter = contextMeter(contextSummary(events), session.contextLimitTokens);
+            return {
+              conversationId: session.conversationId,
+              ...labeled(session.role),
+              status: session.status,
+              shortId: session.conversationId.slice(0, 6),
+              when: relativeTime(events[events.length - 1]?.ts, ui.now),
+              active: session.conversationId === selected?.conversationId,
+              working: session.status === "working",
+              pending: false,
+              instanceIndex: session.instanceIndex,
+              showInstance: showSessionInstance(session, openSessions),
+              context: meter?.short,
+              contextOver: meter?.overLimit,
+            };
+          }),
+        ],
     page: ui.page,
     hookCheck: snapshot.hookCheck,
     loading: ui.loading,

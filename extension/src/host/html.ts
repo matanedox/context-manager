@@ -9,16 +9,10 @@ function nonce(): string {
 }
 
 export function webviewRoots(extensionUri: vscode.Uri): vscode.Uri[] {
-  return [
-    vscode.Uri.joinPath(extensionUri, "webview"),
-    vscode.Uri.joinPath(extensionUri, "media"),
-  ];
+  return [vscode.Uri.joinPath(extensionUri, "webview"), vscode.Uri.joinPath(extensionUri, "media")];
 }
 
-export function loadWebviewHtml(
-  webview: vscode.Webview,
-  extensionUri: vscode.Uri
-): string {
+export function loadWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string {
   const htmlPath = vscode.Uri.joinPath(extensionUri, "webview", "index.html");
   const css = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "webview", "board.css"));
   const n = nonce();

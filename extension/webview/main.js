@@ -35,9 +35,7 @@ function render(payload) {
       }
     : null;
   const handoffCaret =
-    inHandoff && focus?.name === "text"
-      ? { start: focus.selectionStart, end: focus.selectionEnd }
-      : null;
+    inHandoff && focus?.name === "text" ? { start: focus.selectionStart, end: focus.selectionEnd } : null;
   const focusRole = !inAddContext && !inHandoff && !inLimit && !inAuto ? focus?.dataset?.role : undefined;
   const focusConv = !inAddContext && !inHandoff && !inLimit && !inAuto ? focus?.dataset?.conversation : undefined;
   const page = SCREENS[payload.page] ? payload.page : DEFAULT_PAGE;
@@ -57,9 +55,7 @@ function render(payload) {
   if (next) {
     next.focus();
   } else if (limitCaret) {
-    const input = document.querySelector(
-      `[data-session-limit="${CSS.escape(limitCaret.id)}"]`
-    );
+    const input = document.querySelector(`[data-session-limit="${CSS.escape(limitCaret.id)}"]`);
     if (input) {
       input.value = limitCaret.value;
       input.focus();
@@ -221,9 +217,7 @@ document.getElementById("flow")?.addEventListener("submit", (event) => {
   if (form.id === "subagent-form") {
     sendDelegate(text, String(form.elements.role?.value ?? ""));
   } else {
-    const target = (ui.currentPayload?.collaborators ?? []).find(
-      (item) => item.id === ui.handoffTargetId
-    );
+    const target = (ui.currentPayload?.collaborators ?? []).find((item) => item.id === ui.handoffTargetId);
     if (!target) return;
     vscode.postMessage({
       type: "sendHandoff",

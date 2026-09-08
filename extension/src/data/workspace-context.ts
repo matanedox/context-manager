@@ -2,7 +2,15 @@ import * as fs from "fs";
 import * as path from "path";
 import { readContextTabs, type ContextCategory } from "./context-tabs";
 import { frontmatter, markdownFiles, metaList, metaValue, relativePath, slugify } from "./md";
-import { discoverPersonas, GUIDE_PERSONA, isGuide, personaDisplayName, restoreGuide, type Persona, type PersonaSource } from "./personas";
+import {
+  discoverPersonas,
+  GUIDE_PERSONA,
+  isGuide,
+  personaDisplayName,
+  restoreGuide,
+  type Persona,
+  type PersonaSource,
+} from "./personas";
 import { createPersona, personaCharterPath, removePersona, type CreatePersonaInput } from "./persona-store";
 import { isRole, type Role } from "../model/roles";
 
@@ -41,23 +49,27 @@ export type CreateContextInput = {
   categoryId?: string;
 };
 
-export { createPersona, discoverPersonas, GUIDE_PERSONA, isGuide, personaCharterPath, personaDisplayName, removePersona, restoreGuide, slugify };
+export {
+  createPersona,
+  discoverPersonas,
+  GUIDE_PERSONA,
+  isGuide,
+  personaCharterPath,
+  personaDisplayName,
+  removePersona,
+  restoreGuide,
+  slugify,
+};
 export type { CreatePersonaInput, Persona, PersonaSource };
 
-const CONTEXT_ROOTS = [
-  ".cursor/rules/",
-  ".cursor/skills/",
-  ".cursor/workflows/",
-  ".cursor/personas/",
-];
+const CONTEXT_ROOTS = [".cursor/rules/", ".cursor/skills/", ".cursor/workflows/", ".cursor/personas/"];
 
 export function isWorkspaceContextPath(relPath: string): boolean {
   const normalized = relPath.replaceAll("\\", "/");
   return (
     normalized === "AGENTS.md" ||
     normalized === ".cursor/agent-viz/personas.json" ||
-    (CONTEXT_ROOTS.some((prefix) => normalized.startsWith(prefix)) &&
-      !normalized.split("/").includes(".."))
+    (CONTEXT_ROOTS.some((prefix) => normalized.startsWith(prefix)) && !normalized.split("/").includes(".."))
   );
 }
 
@@ -90,7 +102,7 @@ function item(root: string, file: string, type: ContextKind): ContextItem {
       ? "Always applied"
       : globs
         ? `Matching files: ${globs}`
-        : description ?? (type === "rule" ? "Available rule" : `Available ${type}`),
+        : (description ?? (type === "rule" ? "Available rule" : `Available ${type}`)),
   };
 }
 
@@ -174,9 +186,7 @@ export function contextForPersona(context: WorkspaceContext, personaId: Role): W
   const persona =
     context.personas.find((entry) => entry.id === personaId) ??
     ({ id: personaId, title: personaId, description: "", references: [] } satisfies Persona);
-  const rest = context.available.filter(
-    (entry) => entry.personas.length === 0 || matchesPersona(entry, persona)
-  );
+  const rest = context.available.filter((entry) => entry.personas.length === 0 || matchesPersona(entry, persona));
   const mine = rest.filter((entry) => matchesPersona(entry, persona));
   const shared = rest.filter((entry) => !matchesPersona(entry, persona));
   return { ...context, available: [...mine, ...shared] };
@@ -189,10 +199,7 @@ export function linkedContextForPersona(context: WorkspaceContext, personaId: Ro
   return [...context.alwaysOn, ...context.available].filter((entry) => matchesPersona(entry, persona));
 }
 
-export function createContextFile(
-  root: string | undefined,
-  input: CreateContextInput
-): string | null {
+export function createContextFile(root: string | undefined, input: CreateContextInput): string | null {
   if (!root) return null;
   const slug = slugify(input.name);
   if (!slug) return null;
@@ -201,10 +208,13 @@ export function createContextFile(
   const validCategory = input.categoryId && slugify(input.categoryId) === input.categoryId;
   const category = input.kind === "rule" && validCategory ? input.categoryId : undefined;
   const rel =
-    input.kind === "rule" ? `.cursor/rules/${category ? `${category}/` : ""}${slug}.mdc`
-    : input.kind === "skill" ? `.cursor/skills/${slug}/SKILL.md`
-    : input.kind === "workflow" ? `.cursor/workflows/${slug}.md`
-    : `.cursor/personas/${slug}.md`;
+    input.kind === "rule"
+      ? `.cursor/rules/${category ? `${category}/` : ""}${slug}.mdc`
+      : input.kind === "skill"
+        ? `.cursor/skills/${slug}/SKILL.md`
+        : input.kind === "workflow"
+          ? `.cursor/workflows/${slug}.md`
+          : `.cursor/personas/${slug}.md`;
   if (!isWorkspaceContextPath(rel)) return null;
   const abs = path.join(root, rel);
   if (fs.existsSync(abs)) return rel;
@@ -237,10 +247,7 @@ export function deleteContextFile(root: string | undefined, relPath: string): bo
   }
 }
 /** Resolve a context id without letting it escape the workspace context roots. */
-export function contextItemFile(
-  root: string | undefined,
-  itemId: string
-): { absPath: string; relPath: string } | null {
+export function contextItemFile(root: string | undefined, itemId: string): { absPath: string; relPath: string } | null {
   if (!itemId.startsWith("workspace:")) return null;
   const relPath = itemId.slice("workspace:".length);
   if (!root || !isWorkspaceContextPath(relPath)) return null;

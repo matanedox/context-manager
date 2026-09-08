@@ -31,7 +31,7 @@ export function planHandoff(
   root: string | undefined,
   state: BoardState,
   fromId: string | undefined,
-  input: HandoffInput
+  input: HandoffInput,
 ): HandoffPlan {
   if (!root || !fromId) return { warning: "Select a session before sending context." };
   const fromSession = state.sessions.find((session) => session.conversationId === fromId);

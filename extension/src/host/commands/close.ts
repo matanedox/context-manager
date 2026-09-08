@@ -58,10 +58,7 @@ export function closeSession(host: CloseHost, conversationId: string): void {
  * Chats the user closed in Cursor itself. The sessionEnd hook is the only notice the board gets, so
  * the row spins from that notice until its state is gone rather than vanishing mid-refresh.
  */
-export function reapClosedSessions(
-  host: CloseHost,
-  sessions: Array<{ conversationId: string; status: string }>
-): void {
+export function reapClosedSessions(host: CloseHost, sessions: Array<{ conversationId: string; status: string }>): void {
   for (const { conversationId, status } of sessions) {
     if (!conversationId) continue;
     if (status !== "closed") {

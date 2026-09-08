@@ -21,7 +21,7 @@ export function shouldAutoContinue(
    * conversation is never rolled, because the board cannot read a conversation — the user rolls
    * that one by hand.
    */
-  didWork = true
+  didWork = true,
 ): boolean {
   if (!didWork) return false;
   if (!session.autoContinueOnLimit) return false;
@@ -76,11 +76,7 @@ export async function waitForRecap(filePath: string, timeoutMs = 8000): Promise<
 export const AUTO_CONTINUE_PENDING = "pending";
 
 /** Checkbox beside the cap. A session with no cap cannot auto-continue. */
-export function setSessionAutoContinue(
-  root: string | undefined,
-  conversationId: string,
-  enabled: boolean
-): boolean {
+export function setSessionAutoContinue(root: string | undefined, conversationId: string, enabled: boolean): boolean {
   const limit = sessionContextLimit(root, conversationId);
   return patchSessionSettings(root, conversationId, (settings) => {
     if (!enabled || limit == null || limit <= 0) delete settings.autoContinueOnLimit;
@@ -115,7 +111,7 @@ export function unclaimAutoContinue(root: string | undefined, conversationId: st
 export function finishAutoContinue(
   root: string | undefined,
   fromConversationId: string,
-  toConversationId: string
+  toConversationId: string,
 ): boolean {
   if (!root || !fromConversationId || !toConversationId) return false;
   const from = readSessionSettings(root)[fromConversationId];

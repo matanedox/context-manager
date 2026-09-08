@@ -23,11 +23,7 @@ export type RolloverHost = {
   startSession: (role: Role, note?: string, from?: string) => void;
 };
 
-export function queueAutoContinue(
-  host: RolloverHost,
-  snapshot: BoardSnapshot,
-  root: string | undefined
-): void {
+export function queueAutoContinue(host: RolloverHost, snapshot: BoardSnapshot, root: string | undefined): void {
   if (host.usingDemo || host.autoContinuing || !root) return;
   const hit = snapshot.state.sessions.find((session) => {
     const events = snapshot.state.eventsByConversation.get(session.conversationId) ?? [];
@@ -43,8 +39,7 @@ export function queueAutoContinue(
   // An Ask-mode chat is read-only, so it cannot write the recap it would be asked for. Skipping the
   // round trip costs nothing it could have delivered and saves stalling the rollover for the whole
   // recap timeout; the replacement falls back to the brief built from the activity log.
-  const asking =
-    contextSummary(snapshot.state.eventsByConversation.get(fromId) ?? []).composerMode === "ask";
+  const asking = contextSummary(snapshot.state.eventsByConversation.get(fromId) ?? []).composerMode === "ask";
   void runChatTask(async () => {
     try {
       let recap: string | undefined;

@@ -38,9 +38,7 @@ function personaFileBody(id: Role, title: string, description: string, name?: st
 
 function charterFile(root: string): string | undefined {
   const dir = path.join(root, ".cursor", "personas");
-  return markdownFiles(dir).find(
-    (file) => personasFromCharter(fs.readFileSync(file, "utf8")).length > 0
-  );
+  return markdownFiles(dir).find((file) => personasFromCharter(fs.readFileSync(file, "utf8")).length > 0);
 }
 
 function appendToCharter(file: string, id: Role, description: string, name?: string): void {
@@ -158,7 +156,13 @@ function removeFromCharter(file: string, id: Role): void {
     }
     if (!skipping) kept.push(line);
   }
-  fs.writeFileSync(file, `${kept.join("\n").replace(/\n{3,}/g, "\n\n").trim()}\n`);
+  fs.writeFileSync(
+    file,
+    `${kept
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim()}\n`,
+  );
 }
 
 /**

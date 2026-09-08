@@ -29,11 +29,7 @@ export function buildTeam(snapshot: BoardSnapshot): TeamScreen {
     needsSetup: !usingDemo && context.personaSource === "fallback",
     roster: personas.map((entry) => ({
       role: entry.id,
-      ...personaDisplay(
-        entry.id,
-        personaName(entry.id, personaDisplayName(entry)),
-        entry.title
-      ),
+      ...personaDisplay(entry.id, personaName(entry.id, personaDisplayName(entry)), entry.title),
       // No card is kept against the user's wishes. Onboarding is a preference either way; a project
       // persona needs a roster file to be removed from, which the preview roster is not.
       removable: isGuide(entry.id) || context.personaSource !== "fallback",

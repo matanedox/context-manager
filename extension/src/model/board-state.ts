@@ -6,10 +6,7 @@ import { assignInstanceIndexes } from "./session-label";
 import type { HookEvent, LiveEdge, PersistedState, Role, SessionState } from "./types";
 
 /** Sessions replayed from the log: roles come from board clicks recorded on sessionStart. */
-export function deriveDemoSessions(
-  events: HookEvent[],
-  roleMap: Record<string, string>
-): SessionState[] {
+export function deriveDemoSessions(events: HookEvent[], roleMap: Record<string, string>): SessionState[] {
   const sessions = new Map<string, SessionState>();
   for (const event of events) {
     const conversationId = event.raw?.conversation_id;
@@ -51,7 +48,7 @@ export function boardState(
   events: HookEvent[],
   roleMap: Record<string, string>,
   persisted: PersistedState,
-  usingDemo: boolean
+  usingDemo: boolean,
 ) {
   const replayed = deriveDemoSessions(events, roleMap);
   const replayedById = new Map(replayed.map((session) => [session.conversationId, session]));
@@ -69,9 +66,7 @@ export function boardState(
           const role = clicked.get(session.conversationId) ?? session.role;
           const current = replayedById.get(session.conversationId);
           if (!current) return { ...session, role };
-          const childStatus = new Map(
-            current.subagents.map((child) => [child.type, child.status])
-          );
+          const childStatus = new Map(current.subagents.map((child) => [child.type, child.status]));
           return {
             ...session,
             role,
@@ -90,7 +85,7 @@ export function boardState(
   for (const role of new Set(sessions.map((session) => session.role))) {
     if (role) assignInstanceIndexes(sessions, role);
   }
-  const pendingRole = !usingDemo ? persisted.pendingRole ?? null : null;
+  const pendingRole = !usingDemo ? (persisted.pendingRole ?? null) : null;
   const working = new Set<Role>();
   const focused = new Set<Role>();
   const liveEdges = new Map<string, LiveEdge>();

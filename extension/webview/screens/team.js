@@ -29,17 +29,17 @@ function renderRoster(payload) {
     .map(
       (item) => `<div class="figure-wrap${item.dimmed ? " dimmed" : ""}">
         <button class="figure" data-role="${escapeHtml(item.role)}" type="button" title="${escapeHtml(
-          item.dimmed ? "Onboarding — extension setup and support" : item.role
+          item.dimmed ? "Onboarding — extension setup and support" : item.role,
         )}">
           ${ROBOT_SVG}${personaFigureCopy(item)}</button>${
-          item.removable
-            ? `<button class="figure-remove" data-remove-role="${escapeHtml(
-                item.role
-              )}" type="button" aria-label="Remove ${escapeHtml(
-                item.name ?? item.roleLabel
-              )}" title="Remove persona">×</button>`
-            : ""
-        }</div>`
+            item.removable
+              ? `<button class="figure-remove" data-remove-role="${escapeHtml(
+                  item.role,
+                )}" type="button" aria-label="Remove ${escapeHtml(
+                  item.name ?? item.roleLabel,
+                )}" title="Remove persona">×</button>`
+              : ""
+          }</div>`,
     )
     .join("");
   const addActive = ui.showAddPersona ? " active" : "";
@@ -47,7 +47,7 @@ function renderRoster(payload) {
     document.getElementById("roster"),
     `${figures}<button class="figure figure-add${addActive}" type="button" data-toggle-add-persona aria-pressed="${ui.showAddPersona}" title="Add a scrum persona">
     ${ADD_SVG}<span class="figure-copy"><span class="role">Add persona</span></span>
-  </button>`
+  </button>`,
   );
 }
 
@@ -78,23 +78,20 @@ function renderAccountUsage(payload, refreshing) {
     help.hidden
       ? ""
       : `${usage.details.map((line) => `<p>${escapeHtml(line)}</p>`).join("")}
-         <p><button type="button" class="account-usage-link" data-open-usage-dashboard>Open cursor.com/dashboard/usage</button></p>`
+         <p><button type="button" class="account-usage-link" data-open-usage-dashboard>Open cursor.com/dashboard/usage</button></p>`,
   );
   if (!usage || usage.kind === "loading") {
     paint(el, `${USAGE_ICON}<span class="account-usage-label">Checking usage…</span>`);
     return;
   }
   if (usage.kind === "needsAuth") {
-    paint(
-      el,
-      `<button type="button" class="account-usage-connect" data-connect-usage>Connect Cursor usage</button>`
-    );
+    paint(el, `<button type="button" class="account-usage-connect" data-connect-usage>Connect Cursor usage</button>`);
     return;
   }
   if (usage.kind === "error") {
     paint(
       el,
-      `${USAGE_ICON}<span class="account-usage-label">${escapeHtml(usage.message)}</span><button type="button" class="account-usage-connect" data-connect-usage>Retry</button>`
+      `${USAGE_ICON}<span class="account-usage-label">${escapeHtml(usage.message)}</span><button type="button" class="account-usage-connect" data-connect-usage>Retry</button>`,
     );
     return;
   }
@@ -111,7 +108,7 @@ function renderAccountUsage(payload, refreshing) {
   paint(
     el,
     `${USAGE_ICON}<span class="account-usage-reading" aria-label="Cursor usage: ${escapeHtml(
-      usage.label
+      usage.label,
     )}">${reading}</span>
     <span class="account-usage-actions">
       <button type="button" class="account-usage-refresh${
@@ -120,7 +117,7 @@ function renderAccountUsage(payload, refreshing) {
       <button type="button" class="account-usage-help" data-toggle-usage-help aria-expanded="${
         ui.showUsageHelp
       }" aria-controls="account-usage-help" title="What this reading covers" aria-label="What this reading covers">${INFO_ICON}</button>
-    </span>`
+    </span>`,
   );
 }
 

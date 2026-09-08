@@ -7,14 +7,7 @@ const { boardState } = require("../out/model/board-state");
 const { personaDisplay } = require("../out/present/view-model");
 const { personaName } = require("../out/present/persona");
 const { personaDisplayName } = require("../out/data/personas");
-const {
-  event,
-  payloadFor,
-  repoContext,
-  repoRoot,
-  roleMap,
-  sampleState,
-} = require("./fixtures");
+const { event, payloadFor, repoContext, repoRoot, roleMap, sampleState } = require("./fixtures");
 
 const payload = payloadFor(
   sampleState,
@@ -24,7 +17,7 @@ const payload = payloadFor(
   repoContext,
   Date.parse("2026-08-20T13:00:30Z"),
   true,
-  repoRoot
+  repoRoot,
 );
 assert.equal(payload.eventsByConversation, undefined, "view model must not include Maps");
 JSON.stringify(payload);
@@ -39,16 +32,16 @@ assert.equal(
       ],
       roleMap,
       {},
-      false
+      false,
     ),
     false,
     roleMap,
     "conv-a",
     repoContext,
-    Date.now()
+    Date.now(),
   ).log.filter((row) => row.text.includes("session started")).length,
   1,
-  "duplicate sessionStart events collapse to one activity row"
+  "duplicate sessionStart events collapse to one activity row",
 );
 // The project manager leads the project roster; Onboarding stays available for extension support at the end.
 assert.equal(payload.roster[0].role, "project-manager");
@@ -66,30 +59,26 @@ assert.ok(
     conversationId: "conv-b",
     startedAt: Date.now(),
   }).sessions.some((session) => session.conversationId === "conv-b"),
-  "the chat being closed keeps its row while the loader is on it"
+  "the chat being closed keeps its row while the loader is on it",
 );
 assert.equal(payload.sessions[0].working, true, "only a working session gets the pulse flag");
 assert.deepEqual(
   Object.keys(payload.roster[0]),
   ["role", "roleLabel", "name", "removable", "dimmed"],
-  "roster cards carry no live state, so hook refreshes cannot make them flash"
+  "roster cards carry no live state, so hook refreshes cannot make them flash",
 );
 assert.equal(payload.roster.at(-1).name, undefined, "Onboarding has a role title, not a baked-in first name");
 assert.equal(personaName("project-manager"), undefined, "the project manager has no default first name");
-assert.equal(
-  personaName("project-manager", "Wendy"),
-  "Wendy",
-  "and the persona source is how a project names it"
-);
+assert.equal(personaName("project-manager", "Wendy"), "Wendy", "and the persona source is how a project names it");
 assert.equal(personaName("beta"), undefined, "other personas stay unnamed until their source names them");
 assert.equal(
   payload.roster.at(-1).roleLabel,
   "Onboarding",
-  "a card names the role the persona declares, not the capitalised slug of its id"
+  "a card names the role the persona declares, not the capitalised slug of its id",
 );
 assert.ok(
   payload.collaborators.some((item) => item.kind === "subagent" && item.subagentType === "bugbot"),
-  "agent detail lists running subagents as talk targets"
+  "agent detail lists running subagents as talk targets",
 );
 
 // The board renders from the payload, so the markup has to keep reading these fields.
@@ -102,7 +91,7 @@ const webviewScript = fs
 assert.match(
   webviewScript,
   /aria-busy="true"/,
-  "slow chat switching renders its loader inside the affected session row"
+  "slow chat switching renders its loader inside the affected session row",
 );
 assert.match(webviewScript, /payload\.contextTabs/, "context tabs render from the view model");
 assert.match(webviewScript, /data-favorite-item/, "context rows expose favorite controls");
@@ -115,7 +104,7 @@ assert.match(webviewScript, /data-auto-continue/, "the budget can opt into auto-
 assert.match(
   webviewScript,
   /payload\.contextLimitField/,
-  "the budget field carries its own unit: the reading is spend across the chat, not window size"
+  "the budget field carries its own unit: the reading is spend across the chat, not window size",
 );
 assert.match(webviewScript, /data-toggle-context-help/, "the meter explains itself in a panel");
 assert.match(webviewScript, /data-connect-usage/, "unsigned usage offers a connect button");
@@ -123,7 +112,7 @@ assert.match(webviewScript, /data-refresh-usage/, "usage has a refresh control n
 assert.match(
   webviewScript,
   /account-usage-actions/,
-  "refresh and info share one control cluster at the end of the usage row"
+  "refresh and info share one control cluster at the end of the usage row",
 );
 assert.match(webviewScript, /data-toggle-usage-help/, "the usage reading explains itself in a panel");
 assert.match(webviewScript, /usage-lead/, "the spending half of the usage reading leads, the other dims");
@@ -131,14 +120,11 @@ assert.equal(payload.accountUsage, undefined, "usage is host-owned and absent un
 assert.doesNotMatch(
   webviewScript,
   /style="/,
-  "the webview CSP has no 'unsafe-inline', so painted html cannot size anything with a style attribute"
+  "the webview CSP has no 'unsafe-inline', so painted html cannot size anything with a style attribute",
 );
 
 // persona display copy
-assert.equal(
-  personaDisplayName({ id: "code-reviewer", title: "Code Reviewer", name: "SecOps" }),
-  "SecOps"
-);
+assert.equal(personaDisplayName({ id: "code-reviewer", title: "Code Reviewer", name: "SecOps" }), "SecOps");
 const namedPersona = personaDisplay("code-reviewer", "SecOps");
 assert.equal(namedPersona.roleLabel, "Code Reviewer");
 assert.equal(namedPersona.name, "SecOps");
@@ -146,22 +132,15 @@ assert.equal(personaDisplay("security").name, undefined);
 assert.equal(
   personaDisplay("guide", "Onboarding", "Onboarding").name,
   undefined,
-  "a name that only repeats the role label is not printed twice"
+  "a name that only repeats the role label is not printed twice",
 );
 
 // nothing selected: no session is active and no other chat's context leaks in
-const initial = payloadFor(
-  sampleState,
-  false,
-  roleMap,
-  undefined,
-  repoContext,
-  Date.parse("2026-08-20T13:00:30Z")
-);
+const initial = payloadFor(sampleState, false, roleMap, undefined, repoContext, Date.parse("2026-08-20T13:00:30Z"));
 assert.equal(
   initial.sessions.some((session) => session.active),
   false,
-  "initial screen selects no session"
+  "initial screen selects no session",
 );
 assert.equal(initial.log.length, 0, "initial screen does not borrow another session's context");
 
@@ -176,7 +155,7 @@ const claimed = boardState(
   [event("sessionStart", "fresh-chat", 0)],
   roleMap,
   { pendingRole: null, sessions: [{ conversationId: "fresh-chat", role: "delta", subagents: [] }] },
-  false
+  false,
 );
 const claimedPayload = payloadFor(claimed, false, roleMap, undefined, repoContext, Date.now());
 assert.equal(claimedPayload.sessions.length, 1, "the pending row is replaced, not duplicated");
@@ -203,7 +182,7 @@ const failed = boardState(
   ],
   roleMap,
   {},
-  false
+  false,
 );
 const failedPayload = payloadFor(failed, false, roleMap, "boom", repoContext, Date.now());
 assert.equal(failedPayload.sessions[0].working, false, "a failed session stops pulsing");
@@ -214,7 +193,7 @@ const otherChatBusy = payloadFor(sampleState, false, roleMap, "conv-b", repoCont
 assert.equal(
   otherChatBusy.log.some((row) => row.hot),
   false,
-  "a subagent running in conv-a must not light up conv-b's log"
+  "a subagent running in conv-a must not light up conv-b's log",
 );
 
 // every page in the registry produces a payload the board can render
@@ -233,7 +212,7 @@ for (const page of PAGES) {
       hookCheck: { ready: true, missing: [] },
       charterPaths: {},
     },
-    { page, selectedConversationId: "conv-a", now: Date.now() }
+    { page, selectedConversationId: "conv-a", now: Date.now() },
   );
   assert.equal(forPage.page, page, `${page} is reported back to the webview`);
   assert.ok(Array.isArray(forPage.roster), `${page} still carries the shared roster`);
@@ -260,13 +239,16 @@ const twins = payloadFor(
   roleMap,
   "twin-a",
   repoContext,
-  Date.now()
+  Date.now(),
 );
 assert.equal(twins.sessions.find((row) => row.conversationId === "twin-a").showInstance, true);
 assert.equal(twins.sessions.find((row) => row.conversationId === "twin-b").showInstance, true);
 // The rail only reports: rows carry no editor, and no reading before the first turn.
 assert.equal(twins.sessions.find((row) => row.conversationId === "twin-a").context, undefined);
-assert.equal(twins.sessions.every((row) => row.canSetLimit === undefined), true);
+assert.equal(
+  twins.sessions.every((row) => row.canSetLimit === undefined),
+  true,
+);
 
 const loneFirst = payloadFor(
   boardState([], roleMap, { sessions: [twinA] }, false),
@@ -274,7 +256,7 @@ const loneFirst = payloadFor(
   roleMap,
   "twin-a",
   repoContext,
-  Date.now()
+  Date.now(),
 );
 assert.equal(loneFirst.sessions[0].showInstance, false, "a lone first session stays unnumbered");
 
@@ -284,12 +266,8 @@ const leftoverSecond = payloadFor(
   roleMap,
   "twin-b",
   repoContext,
-  Date.now()
+  Date.now(),
 );
-assert.equal(
-  leftoverSecond.sessions[0].showInstance,
-  true,
-  "a leftover ·2 stays numbered after ·1 closes"
-);
+assert.equal(leftoverSecond.sessions[0].showInstance, true, "a leftover ·2 stays numbered after ·1 closes");
 
 console.log("view-model checks passed");

@@ -32,8 +32,7 @@ function handleContextClick(event) {
       if (ui.currentPayload) syncContextForm(ui.currentPayload);
       if (form?.elements.kind) {
         form.elements.kind.value =
-          kindMap[ui.contextTab] ??
-          (ui.contextTab.startsWith("category:") ? ui.contextTab : "rule");
+          kindMap[ui.contextTab] ?? (ui.contextTab.startsWith("category:") ? ui.contextTab : "rule");
       }
       if (ui.currentPayload) syncContextForm(ui.currentPayload);
       document.getElementById("add-context-panel")?.querySelector('input[name="name"]')?.focus();
@@ -129,12 +128,8 @@ document.getElementById("add-context")?.addEventListener("submit", (event) => {
   if (!name) return;
   const selectedKind = value("kind");
   const categoryTab = selectedKind.startsWith("category:") ? selectedKind : ui.contextTab;
-  const categoryId = categoryTab.startsWith("category:")
-    ? categoryTab.slice("category:".length)
-    : undefined;
-  const personas = [...form.querySelectorAll('input[name="persona"]:checked')].map(
-    (input) => input.value
-  );
+  const categoryId = categoryTab.startsWith("category:") ? categoryTab.slice("category:".length) : undefined;
+  const personas = [...form.querySelectorAll('input[name="persona"]:checked')].map((input) => input.value);
   vscode.postMessage({
     type: "createContext",
     kind: categoryId ? "rule" : selectedKind,

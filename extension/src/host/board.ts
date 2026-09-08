@@ -49,7 +49,10 @@ export class ScrumBoard {
     this.webviews.set(webview, setTitle);
     const refresh = () => this.refreshAll();
     bindMessages(webview, {
-      onReady: () => void this.pushAll().then(() => warnMissingHooks(this.lifecycle(), workspaceRoot())).then(() => openWalkthrough(this.lifecycle(), workspaceRoot())),
+      onReady: () =>
+        void this.pushAll()
+          .then(() => warnMissingHooks(this.lifecycle(), workspaceRoot()))
+          .then(() => openWalkthrough(this.lifecycle(), workspaceRoot())),
       onRole: (role) => void this.openPersonaSession(role),
       onSession: (conversationId) => this.selectSession(conversationId),
       onFocusChat: (conversationId) => this.focusSelected(conversationId),
@@ -70,16 +73,22 @@ export class ScrumBoard {
       onRefreshUsage: () => this.usage.refresh(),
       onOpenUsageDashboard: () => this.usage.openDashboard(),
       onRepairHooks: () => this.installHooks(),
-      onBack: () => { this.page = "team"; refresh(); },
+      onBack: () => {
+        this.page = "team";
+        refresh();
+      },
     });
     webview.html = loadWebviewHtml(webview, this.context.extensionUri);
     this.usage.start();
-    this.watcher.start(workspaceRoot(), () => this.repaint(), () => ({
-      visible: this.webviews.size > 0,
-      agentLive:
-        this.page === "agent" && !this.loading.current && Date.now() - this.lastPaint > 1200,
-      sincePaint: Date.now() - this.lastPaint,
-    }));
+    this.watcher.start(
+      workspaceRoot(),
+      () => this.repaint(),
+      () => ({
+        visible: this.webviews.size > 0,
+        agentLive: this.page === "agent" && !this.loading.current && Date.now() - this.lastPaint > 1200,
+        sincePaint: Date.now() - this.lastPaint,
+      }),
+    );
   }
 
   detach(webview: vscode.Webview): void {
@@ -90,8 +99,13 @@ export class ScrumBoard {
     }
   }
 
-  refreshAll(): void { void this.pushAll(); }
-  private repaint(): void { this.lastPaint = Date.now(); this.refreshAll(); }
+  refreshAll(): void {
+    void this.pushAll();
+  }
+  private repaint(): void {
+    this.lastPaint = Date.now();
+    this.refreshAll();
+  }
 
   private clearActivity(): void {
     if (!this.usingDemo && this.selectedConversationId)
@@ -171,7 +185,9 @@ export class ScrumBoard {
     // A chat on its way out keeps its screen until its loader ends, as the rail keeps its row.
     const closing = this.loading.current?.conversationId;
     const known = snapshot.state.sessions.some(
-      (session) => session.conversationId === this.selectedConversationId && (session.status !== "closed" || session.conversationId === closing)
+      (session) =>
+        session.conversationId === this.selectedConversationId &&
+        (session.status !== "closed" || session.conversationId === closing),
     );
     if (!known) {
       this.selectedConversationId = undefined;
@@ -189,13 +205,19 @@ export class ScrumBoard {
       setTitle("");
       void webview.postMessage(message);
     }
-    queueAutoContinue({
-      usingDemo: this.usingDemo,
-      autoContinuing: this.autoContinuing,
-      extensionPath: this.context.extensionPath,
-      markRunning: (running) => { this.autoContinuing = running; },
-      startSession: (role, note, from) => this.startSession(role, note, from),
-    }, snapshot, workspaceRoot());
+    queueAutoContinue(
+      {
+        usingDemo: this.usingDemo,
+        autoContinuing: this.autoContinuing,
+        extensionPath: this.context.extensionPath,
+        markRunning: (running) => {
+          this.autoContinuing = running;
+        },
+        startSession: (role, note, from) => this.startSession(role, note, from),
+      },
+      snapshot,
+      workspaceRoot(),
+    );
   }
 
   private startSession(role: Role, continueNote?: string, rolloverFrom?: string): void {
@@ -205,16 +227,21 @@ export class ScrumBoard {
         extensionPath: this.context.extensionPath,
         loading: this.loading,
         refresh: () => this.refreshAll(),
-        pin: (id) => { this.pinningConversationId = id; this.selectedConversationId = id; },
+        pin: (id) => {
+          this.pinningConversationId = id;
+          this.selectedConversationId = id;
+        },
         release: (clear) => {
           this.pinningConversationId = undefined;
           if (clear) this.selectedConversationId = undefined;
         },
-        showAgentPage: () => { this.page = "agent"; },
+        showAgentPage: () => {
+          this.page = "agent";
+        },
       },
       role,
       continueNote,
-      rolloverFrom
+      rolloverFrom,
     );
   }
 
@@ -239,12 +266,20 @@ export class ScrumBoard {
       extensionPath: this.context.extensionPath,
       refreshAll: () => this.refreshAll(),
       startSession: (role: Role) => this.startSession(role),
-      markHooksOffered: () => { this.hooksOffered = true; },
+      markHooksOffered: () => {
+        this.hooksOffered = true;
+      },
     };
   }
 
-  installHooks(): void { runInstallHooks(this.lifecycle(), workspaceRoot()); }
-  async removeAll(): Promise<void> { await runRemoveAll(this.lifecycle(), workspaceRoot()); }
+  installHooks(): void {
+    runInstallHooks(this.lifecycle(), workspaceRoot());
+  }
+  async removeAll(): Promise<void> {
+    await runRemoveAll(this.lifecycle(), workspaceRoot());
+  }
 }
 
-function workspaceRoot(): string | undefined { return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath; }
+function workspaceRoot(): string | undefined {
+  return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+}

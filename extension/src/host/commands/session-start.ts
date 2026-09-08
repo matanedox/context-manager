@@ -2,14 +2,7 @@
 import * as vscode from "vscode";
 import { eventType, parseLines } from "../../model/events";
 import { isRole, roleLabel, type Role } from "../../model/roles";
-import {
-  chatIds,
-  closeChatTab,
-  focusChat,
-  newChat,
-  nudgeChat,
-  runChatTask,
-} from "../cursor-chat";
+import { chatIds, closeChatTab, focusChat, newChat, nudgeChat, runChatTask } from "../cursor-chat";
 import { appendHandoff } from "../../data/handoffs";
 import { checkHooks } from "../../data/hooks-install";
 import { HELLO_PROMPT, takeIntroNote } from "../../data/intro";
@@ -54,7 +47,7 @@ export function leftoverTabs(
   root: string | undefined,
   extensionPath: string,
   before: Set<string>,
-  keep: string
+  keep: string,
 ): string[] {
   const loaded = loadEvents(root, extensionPath);
   if (loaded.usingDemo) return [];
@@ -70,12 +63,7 @@ export function leftoverTabs(
 }
 
 /** `continueNote` is what a chat opened beside — or in place of — another one is told about it. */
-export function startRoleSession(
-  host: SessionHost,
-  role: Role,
-  continueNote?: string,
-  rolloverFrom?: string
-): void {
+export function startRoleSession(host: SessionHost, role: Role, continueNote?: string, rolloverFrom?: string): void {
   const token = host.loading.begin(`Starting ${role} session…`);
   void runChatTask(async () => {
     const { root, extensionPath, loading } = host;
@@ -101,18 +89,12 @@ export function startRoleSession(
       // sitting in the composer after the chat had already answered it.
       const prefill = intro ? HELLO_PROMPT : undefined;
       await newChat(prefill ? false : hooksReady, prefill, Boolean(intro));
-      const conversationId = await waitForCreatedChat(
-        root,
-        extensionPath,
-        before,
-        afterEventCount,
-        5000
-      );
+      const conversationId = await waitForCreatedChat(root, extensionPath, before, afterEventCount, 5000);
       if (!conversationId) {
         clearPendingRole(root);
         if (rolloverFrom) unclaimAutoContinue(root, rolloverFrom);
         void vscode.window.showWarningMessage(
-          `Cursor did not open a new chat for ${role}. The board cleared the starting session.`
+          `Cursor did not open a new chat for ${role}. The board cleared the starting session.`,
         );
         return;
       }
@@ -126,23 +108,20 @@ export function startRoleSession(
       if (!contextReady) {
         if (rolloverFrom) unclaimAutoContinue(root, rolloverFrom);
         host.release(true);
-        void vscode.window.showErrorMessage(
-          `Could not load ${role} context. The chat was not opened.`
-        );
+        void vscode.window.showErrorMessage(`Could not load ${role} context. The chat was not opened.`);
         return;
       }
       if (rolloverFrom) finishAutoContinue(root, rolloverFrom, conversationId);
       const persona = workspaceContext(root).personas.find((entry) => entry.id === role);
       const personaLabel =
-        personaName(role, persona ? personaDisplayName(persona) : undefined) ??
-        roleLabel(role, persona?.title);
+        personaName(role, persona ? personaDisplayName(persona) : undefined) ?? roleLabel(role, persona?.title);
       // "Another session opened" is for a twin beside you. The chat this one replaces is not a
       // twin, and telling it so cost the retiring chat a turn to acknowledge an aside.
       const siblingNotes = planSiblingNotes(
         readPersistedState(root).sessions ?? [],
         conversationId,
         role,
-        personaLabel
+        personaLabel,
       ).filter((note) => note.conversationId !== rolloverFrom);
       for (const note of siblingNotes) {
         appendHandoff(root, {

@@ -25,12 +25,12 @@ async function wipe(root: string | undefined, extensionPath: string, usingDemo: 
 export async function repairInstall(
   root: string | undefined,
   extensionPath: string,
-  usingDemo: boolean
+  usingDemo: boolean,
 ): Promise<boolean> {
   const choice = await vscode.window.showWarningMessage(
     `Reinstall agent hooks? This closes every open session and clears all saved board data. ${KEPT}`,
     { modal: true },
-    "Reinstall"
+    "Reinstall",
   );
   if (choice !== "Reinstall") return false;
   await wipe(root, extensionPath, usingDemo);
@@ -41,18 +41,18 @@ export async function repairInstall(
 export async function removeEverything(
   root: string | undefined,
   extensionPath: string,
-  usingDemo: boolean
+  usingDemo: boolean,
 ): Promise<boolean> {
   const choice = await vscode.window.showWarningMessage(
     `Remove the Scrum board's hooks and all session data? ${KEPT}`,
     { modal: true },
-    "Remove"
+    "Remove",
   );
   if (choice !== "Remove") return false;
   const removed = uninstallHooks(root);
   await wipe(root, extensionPath, usingDemo);
   void vscode.window.showInformationMessage(
-    `Removed ${removed.length} hook file${removed.length === 1 ? "" : "s"} and all board session data.`
+    `Removed ${removed.length} hook file${removed.length === 1 ? "" : "s"} and all board session data.`,
   );
   return true;
 }

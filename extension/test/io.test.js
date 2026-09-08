@@ -23,11 +23,7 @@ const {
   writePersistedState,
 } = require("../out/data/io");
 const { readSnapshot } = require("../out/data/snapshot");
-const {
-  claimAutoContinue,
-  finishAutoContinue,
-  setSessionAutoContinue,
-} = require("../out/data/auto-continue");
+const { claimAutoContinue, finishAutoContinue, setSessionAutoContinue } = require("../out/data/auto-continue");
 const { continuationNote, planSiblingNotes } = require("../out/data/sibling-sessions");
 const { assignInstanceIndexes } = require("../out/model/session-label");
 const {
@@ -56,11 +52,11 @@ assert.equal(afterClear.length, 1, "clearing activity removes only that session'
 assert.match(
   afterClear[0],
   /"role":"beta"/,
-  "and keeps the event that binds its persona, so a cleared chat is not rebuilt as the guide"
+  "and keeps the event that binds its persona, so a cleared chat is not rebuilt as the guide",
 );
 assert.ok(
   readPersistedState(tmp).sessions.some((session) => session.conversationId === "manual"),
-  "clearing activity keeps the session open"
+  "clearing activity keeps the session open",
 );
 purgeConversation(tmp, "manual");
 const kept = fs.readFileSync(runtimeFile(tmp, "events.jsonl"), "utf8");
@@ -69,7 +65,7 @@ assert.match(kept, /keep/, "an open conversation keeps its own events");
 assert.deepEqual(
   readPersistedState(tmp).sessions.map((session) => session.conversationId),
   ["keep"],
-  "and its state row, while the closed one is dropped"
+  "and its state row, while the closed one is dropped",
 );
 assert.equal(
   payloadFor(
@@ -78,10 +74,10 @@ assert.equal(
     roleMap,
     "keep",
     repoContext,
-    Date.now()
+    Date.now(),
   ).sessions.length,
   1,
-  "a purged session leaves the board and the survivor stays"
+  "a purged session leaves the board and the survivor stays",
 );
 
 // The last session out removes the saved state, so a finished workspace stores nothing of it.
@@ -96,7 +92,7 @@ assert.equal(fs.readFileSync(runtimeFile(tmp, "events.jsonl"), "utf8"), "", "the
 assert.deepEqual(
   loadEvents(tmp, path.join(__dirname, "..")),
   { text: "", usingDemo: false },
-  "an empty log is an empty board, not the demo"
+  "an empty log is an empty board, not the demo",
 );
 
 // Install / Repair is a reset: it archives the open chats and then leaves nothing on disk.
@@ -110,11 +106,7 @@ const rows = [
 assert.deepEqual(openConversationIds(rows, false), ["live"], "a reset archives only open chats");
 assert.deepEqual(openConversationIds(rows, true), [], "demo rows name no chat to archive");
 removeRuntimeState(reset);
-assert.equal(
-  fs.existsSync(runtimeFile(reset, "events.jsonl")),
-  false,
-  "a reset clears every saved board file"
-);
+assert.equal(fs.existsSync(runtimeFile(reset, "events.jsonl")), false, "a reset clears every saved board file");
 
 // a click Cursor never turned into a session expires instead of wedging the board
 writePendingRole(tmp, "gamma", 0);
@@ -122,7 +114,7 @@ assert.equal(readPendingRole(tmp), "gamma", "a fresh click is still waiting for 
 assert.equal(
   readPendingRole(tmp, Date.now() + PENDING_ROLE_TTL_MS + 1000),
   null,
-  "an unclaimed role expires so later clicks are not stuck on Starting"
+  "an unclaimed role expires so later clicks are not stuck on Starting",
 );
 assert.equal(readPendingRole(tmp), null, "the expired role file is cleaned up");
 fs.rmSync(tmp, { recursive: true, force: true });
@@ -137,7 +129,7 @@ const stillStarting = payloadFor(
   roleMap,
   undefined,
   repoContext,
-  Date.now()
+  Date.now(),
 );
 assert.equal(stillStarting.sessions[0].pending, true, "the row waits while the chat is created");
 
@@ -145,7 +137,7 @@ appendSessionStart(board, "chat-new", "beta");
 assert.equal(
   bindSessionRole(board, "chat-new", "beta"),
   true,
-  "persona assignment is persisted before the chat becomes visible"
+  "persona assignment is persisted before the chat becomes visible",
 );
 assert.equal(readPersistedState(board).sessions[0].role, "beta");
 clearPendingRole(board);
@@ -154,13 +146,13 @@ const bound = payloadFor(
     parseLines(fs.readFileSync(runtimeFile(board, "events.jsonl"), "utf8")),
     roleMap,
     { ...readPersistedState(board), pendingRole: readPendingRole(board) },
-    false
+    false,
   ),
   false,
   roleMap,
   undefined,
   repoContext,
-  Date.now()
+  Date.now(),
 );
 assert.equal(bound.sessions.length, 1, "the starting row is replaced by the real session");
 assert.equal(bound.sessions[0].pending, false, "the bound session is no longer starting");
@@ -169,7 +161,7 @@ assert.equal(bound.sessions[0].conversationId, "chat-new");
 assert.equal(
   readPersistedState(board).sessions[0].instanceIndex,
   1,
-  "the first board-started chat of a persona is session 1"
+  "the first board-started chat of a persona is session 1",
 );
 bindSessionRole(board, "chat-two", "beta");
 assert.equal(readPersistedState(board).sessions[1].instanceIndex, 2, "a second click is session 2");
@@ -184,79 +176,53 @@ assignInstanceIndexes(legacy, "beta");
 assert.deepEqual(
   legacy.map((session) => session.instanceIndex),
   [1, 2],
-  "unnumbered chats of a persona are backfilled oldest first"
+  "unnumbered chats of a persona are backfilled oldest first",
 );
 // What the user set is read back from the settings file, not from the state file the hook owns.
 const setting = (id) => readSessionSettings(board)[id] ?? {};
-assert.equal(
-  setSessionContextLimit(board, "chat-new", 80_000),
-  true
-);
+assert.equal(setSessionContextLimit(board, "chat-new", 80_000), true);
 assert.equal(setting("chat-new").contextLimitTokens, 80_000);
 // The field takes either unit; a bare number is millions, the scale a long chat's spend sits at.
 assert.equal(setSessionContextLimitField(board, "chat-new", "5"), true);
 assert.equal(setting("chat-new").contextLimitTokens, 5_000_000);
 assert.equal(setSessionContextLimitField(board, "chat-new", "80k"), true);
-assert.equal(
-  setting("chat-new").contextLimitTokens,
-  80_000,
-  "a short chat can still be capped in thousands"
-);
+assert.equal(setting("chat-new").contextLimitTokens, 80_000, "a short chat can still be capped in thousands");
 assert.equal(setSessionContextLimitField(board, "chat-new", "2.5M"), true);
 assert.equal(setting("chat-new").contextLimitTokens, 2_500_000);
 assert.equal(setSessionContextLimitField(board, "chat-new", "nope"), false, "junk is refused");
-assert.equal(
-  setting("chat-new").contextLimitTokens,
-  2_500_000,
-  "a refused budget leaves the stored one alone"
-);
+assert.equal(setting("chat-new").contextLimitTokens, 2_500_000, "a refused budget leaves the stored one alone");
 assert.equal(setSessionContextLimitField(board, "chat-new", "  "), true);
-assert.equal(
-  setting("chat-new").contextLimitTokens,
-  undefined,
-  "an empty field clears the budget"
-);
+assert.equal(setting("chat-new").contextLimitTokens, undefined, "an empty field clears the budget");
 assert.equal(setSessionContextLimit(board, "chat-new", 80_000), true);
 assert.equal(setSessionContextLimit(board, "chat-new", undefined), true);
-assert.equal(
-  setting("chat-new").contextLimitTokens,
-  undefined,
-  "clearing the field drops the cap"
-);
+assert.equal(setting("chat-new").contextLimitTokens, undefined, "clearing the field drops the cap");
 assert.equal(setSessionContextLimit(board, "chat-new", 80_000), true);
 assert.equal(setSessionAutoContinue(board, "chat-new", true), true);
 assert.equal(setting("chat-new").autoContinueOnLimit, true);
 assert.equal(setSessionAutoContinue(board, "chat-new", false), true);
-assert.equal(
-  setting("chat-new").autoContinueOnLimit,
-  undefined,
-  "unchecking drops the flag"
-);
+assert.equal(setting("chat-new").autoContinueOnLimit, undefined, "unchecking drops the flag");
 assert.equal(setSessionAutoContinue(board, "chat-new", true), true);
 assert.equal(setSessionContextLimit(board, "chat-new", undefined), true);
-assert.equal(
-  setting("chat-new").autoContinueOnLimit,
-  undefined,
-  "clearing the cap also clears auto-continue"
-);
+assert.equal(setting("chat-new").autoContinueOnLimit, undefined, "clearing the cap also clears auto-continue");
 assert.equal(setSessionContextLimit(board, "chat-new", 80_000), true);
 assert.equal(setSessionAutoContinue(board, "chat-new", true), true);
 
 // The hook rebuilds current-state.json from the log on every event and writes the whole file back.
 // While those settings lived in there, a tick that landed inside that read-modify-write was
 // overwritten — Auto switched itself off when the user sent a message.
-writePersistedState(board, { sessions: [{ conversationId: "chat-new", role: "beta", status: "idle", subagents: [] }] });
+writePersistedState(board, {
+  sessions: [{ conversationId: "chat-new", role: "beta", status: "idle", subagents: [] }],
+});
 assert.equal(
   setting("chat-new").autoContinueOnLimit,
   true,
-  "a full rewrite of the state file cannot clear what the user set"
+  "a full rewrite of the state file cannot clear what the user set",
 );
 assert.equal(
-  readSnapshot(board, path.resolve(__dirname, "..")).state.sessions.find(
-    (row) => row.conversationId === "chat-new"
-  ).autoContinueOnLimit,
+  readSnapshot(board, path.resolve(__dirname, "..")).state.sessions.find((row) => row.conversationId === "chat-new")
+    .autoContinueOnLimit,
   true,
-  "and the board still reads it back onto the session it belongs to"
+  "and the board still reads it back onto the session it belongs to",
 );
 
 assert.equal(claimAutoContinue(board, "chat-new"), true);
@@ -271,7 +237,7 @@ assert.equal(setting("chat-next").contextLimitTokens, 80_000, "the replacement k
 assert.equal(
   setting("chat-next").autoContinueOnLimit,
   undefined,
-  "the replacement does not inherit Auto, so one tick cannot start an endless chain"
+  "the replacement does not inherit Auto, so one tick cannot start an endless chain",
 );
 
 const siblingNotes = planSiblingNotes(
@@ -281,7 +247,7 @@ const siblingNotes = planSiblingNotes(
   ],
   "chat-two",
   "beta",
-  "Beta"
+  "Beta",
 );
 assert.equal(siblingNotes.length, 1);
 assert.equal(siblingNotes[0].conversationId, "chat-new");
@@ -291,21 +257,17 @@ assert.deepEqual(
     [{ conversationId: "solo", role: "beta", status: "idle", instanceIndex: 1, subagents: [] }],
     "solo",
     "beta",
-    "Beta"
+    "Beta",
   ),
   [],
-  "the first session of a persona does not notify itself"
+  "the first session of a persona does not notify itself",
 );
 
 // A hook mid-write puts the row back after a close purged it, which flickered the row off, on and
 // off again: the board tombstones the id so the close reads as one.
 purgeConversation(board, "chat-two");
 assert.equal(purgedIds(board).has("chat-two"), true, "a just-closed chat stays hidden");
-assert.equal(
-  purgedIds(board).has("chat-new"),
-  false,
-  "an open chat is untouched by a neighbour's close"
-);
+assert.equal(purgedIds(board).has("chat-new"), false, "an open chat is untouched by a neighbour's close");
 
 // Closing the last chat deletes the state file, so the rows come from the log instead. A sessionEnd
 // the hook appended after the purge replayed the chat back with no role, which the rail named after
@@ -320,12 +282,12 @@ fs.appendFileSync(
     ts: new Date().toISOString(),
     type: "sessionEnd",
     raw: { hook_event_name: "sessionEnd", conversation_id: "chat-ghost" },
-  })}\n`
+  })}\n`,
 );
 assert.deepEqual(
   readSnapshot(ghostRoot, path.resolve(__dirname, "..")).state.sessions,
   [],
-  "a late hook event cannot replay a just-closed chat back onto the rail"
+  "a late hook event cannot replay a just-closed chat back onto the rail",
 );
 
 // The hook process outlives the purge by however long its own turn takes, and a chat Cursor only
@@ -344,11 +306,9 @@ for (const layer of ["../out/data/purge", "../out/data/snapshot"]) {
   delete require.cache[require.resolve(layer)];
 }
 assert.deepEqual(
-  require("../out/data/snapshot")
-    .readSnapshot(laterRoot, path.resolve(__dirname, ".."))
-    .state.sessions,
+  require("../out/data/snapshot").readSnapshot(laterRoot, path.resolve(__dirname, "..")).state.sessions,
   [],
-  "a chat still writing after its close stays closed across a window reload"
+  "a chat still writing after its close stays closed across a window reload",
 );
 
 const brief = continuationNote({
@@ -374,12 +334,18 @@ assert.match(
     recap: "Finish the meter, then stop.",
   }),
   /Its recap: Finish the meter/,
-  "a landed recap rides the continuation note"
+  "a landed recap rides the continuation note",
 );
 assert.match(
-  continuationNote({ personaLabel: "Beta", previousIndex: 1, files: [], toolCalls: 3, kind: "sibling" }),
+  continuationNote({
+    personaLabel: "Beta",
+    previousIndex: 1,
+    files: [],
+    toolCalls: 3,
+    kind: "sibling",
+  }),
   /second chat for Beta.*stays open/,
-  "a chat opened beside a healthy session is not told that one filled up"
+  "a chat opened beside a healthy session is not told that one filled up",
 );
 
 // The hook reducer recomputes current-state.json and used to reset every board chat to
@@ -388,12 +354,12 @@ const overwritten = boardState(
   parseLines(fs.readFileSync(runtimeFile(board, "events.jsonl"), "utf8")),
   roleMap,
   { sessions: [{ conversationId: "chat-new", role: "alpha", status: "idle", subagents: [] }] },
-  false
+  false,
 );
 assert.equal(
   overwritten.sessions[0].role,
   "beta",
-  "a state file rewritten by the hooks cannot demote a clicked persona"
+  "a state file rewritten by the hooks cannot demote a clicked persona",
 );
 fs.rmSync(board, { recursive: true, force: true });
 

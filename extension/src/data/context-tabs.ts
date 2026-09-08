@@ -25,10 +25,7 @@ function contextTabsPath(root: string): string {
   return runtimeFile(root, "context-tabs.json");
 }
 
-export function readContextTabs(
-  root: string | undefined,
-  validIds?: Set<string>
-): ContextTabsState {
+export function readContextTabs(root: string | undefined, validIds?: Set<string>): ContextTabsState {
   if (!root) return { ...EMPTY_TABS, assignments: {} };
   const file = contextTabsPath(root);
   let parsed: Partial<ContextTabsState>;
@@ -40,21 +37,20 @@ export function readContextTabs(
   const categories = Array.isArray(parsed.categories)
     ? parsed.categories.filter(
         (entry): entry is ContextCategory =>
-          Boolean(entry) && typeof entry.id === "string" && typeof entry.label === "string"
+          Boolean(entry) && typeof entry.id === "string" && typeof entry.label === "string",
       )
     : [];
   const favorites = Array.isArray(parsed.favorites)
     ? parsed.favorites.filter((id): id is string => typeof id === "string")
     : [];
-  const rawAssignments =
-    parsed.assignments && typeof parsed.assignments === "object" ? parsed.assignments : {};
+  const rawAssignments = parsed.assignments && typeof parsed.assignments === "object" ? parsed.assignments : {};
   const assignments = Object.fromEntries(
     categories.map((category) => [
       category.id,
       Array.isArray(rawAssignments[category.id])
         ? rawAssignments[category.id].filter((id): id is string => typeof id === "string")
         : [],
-    ])
+    ]),
   );
   const state = { favorites, categories, assignments };
   if (!validIds) return state;
@@ -62,10 +58,7 @@ export function readContextTabs(
     ...state,
     favorites: state.favorites.filter((id) => validIds.has(id)),
     assignments: Object.fromEntries(
-      categories.map((category) => [
-        category.id,
-        state.assignments[category.id].filter((id) => validIds.has(id)),
-      ])
+      categories.map((category) => [category.id, state.assignments[category.id].filter((id) => validIds.has(id))]),
     ),
   };
   if (JSON.stringify(cleaned) !== JSON.stringify(state)) writeContextTabs(root, cleaned);
@@ -127,14 +120,12 @@ export function setContextCategory(
   root: string | undefined,
   itemId: string,
   categoryId: string,
-  assigned: boolean
+  assigned: boolean,
 ): boolean {
   const state = readContextTabs(root);
   if (!state.categories.some((category) => category.id === categoryId)) return false;
   const current = state.assignments[categoryId] ?? [];
-  const next = assigned
-    ? [...new Set([...current, itemId])]
-    : current.filter((id) => id !== itemId);
+  const next = assigned ? [...new Set([...current, itemId])] : current.filter((id) => id !== itemId);
   return writeContextTabs(root, {
     ...state,
     assignments: { ...state.assignments, [categoryId]: next },
@@ -142,10 +133,7 @@ export function setContextCategory(
 }
 
 /** `personaId` is the persona of the open session; only that persona gets a tab. */
-export function buildContextTabs(
-  context: WorkspaceContext,
-  personaId?: string
-): ContextTab[] {
+export function buildContextTabs(context: WorkspaceContext, personaId?: string): ContextTab[] {
   const items = [...context.alwaysOn, ...context.available];
   const persona = context.personas.find((entry) => entry.id === personaId);
   const tab = (
@@ -153,7 +141,7 @@ export function buildContextTabs(
     label: string,
     kind: ContextTab["kind"],
     matches: (item: ContextItem) => boolean,
-    removable = false
+    removable = false,
   ): ContextTab => {
     const itemIds = items.filter(matches).map((item) => item.id);
     return { id, label, kind, itemIds, count: itemIds.length, removable };
@@ -169,7 +157,7 @@ export function buildContextTabs(
             `persona:${persona.id}`,
             persona.title,
             "persona",
-            (item) => item.personas.includes(persona.id) || item.referencedBy.includes(persona.id)
+            (item) => item.personas.includes(persona.id) || item.referencedBy.includes(persona.id),
           ),
         ]
       : []),
@@ -179,8 +167,8 @@ export function buildContextTabs(
         category.label,
         "category",
         (item) => item.categoryIds.includes(category.id),
-        true
-      )
+        true,
+      ),
     ),
   ];
 }

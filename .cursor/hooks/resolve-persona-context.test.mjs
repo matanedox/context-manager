@@ -14,13 +14,11 @@ process.env.CURSOR_AGENT_VIZ_HOME = fs.mkdtempSync(path.join(os.tmpdir(), "agent
 
 // The hooks and the extension each derive the runtime path; if the two ever disagree, a session
 // writes state the board cannot find. Compiled by `npm test` before this runs.
-const compiledRuntimeDir = createRequire(import.meta.url)(
-  "../../extension/out/data/runtime-dir.js"
-).runtimeDir;
+const compiledRuntimeDir = createRequire(import.meta.url)("../../extension/out/data/runtime-dir.js").runtimeDir;
 assert.equal(
   runtimeDir(process.cwd()),
   compiledRuntimeDir(process.cwd()),
-  "hook and extension must resolve one runtime directory per workspace"
+  "hook and extension must resolve one runtime directory per workspace",
 );
 
 const roleMap = { bugbot: "gamma", explore: "beta" };
@@ -43,10 +41,10 @@ assert.equal(
       ],
     },
     roleMap,
-    null
+    null,
   ).persona,
   "gamma",
-  "bugbot maps to gamma even before subagent row exists in state"
+  "bugbot maps to gamma even before subagent row exists in state",
 );
 
 assert.equal(
@@ -64,10 +62,10 @@ assert.equal(
       sessions: [{ conversationId: "parent-chat", role: "alpha", subagents: [] }],
     },
     roleMap,
-    null
+    null,
   ).persona,
   "gamma",
-  "subagent conversation id resolves to mapped persona"
+  "subagent conversation id resolves to mapped persona",
 );
 
 assert.equal(
@@ -83,21 +81,16 @@ assert.equal(
       ],
     },
     roleMap,
-    null
+    null,
   ).persona,
   "alpha",
-  "parent chat keeps its own persona while a subagent runs"
+  "parent chat keeps its own persona while a subagent runs",
 );
 
 assert.equal(
-  resolvePersona(
-    { hook_event_name: "beforeSubmitPrompt", conversation_id: "unknown-chat" },
-    {},
-    roleMap,
-    null
-  ).persona,
+  resolvePersona({ hook_event_name: "beforeSubmitPrompt", conversation_id: "unknown-chat" }, {}, roleMap, null).persona,
   "",
-  "a chat the board never started wears no persona, so nothing is injected into it"
+  "a chat the board never started wears no persona, so nothing is injected into it",
 );
 
 assert.equal(
@@ -110,30 +103,26 @@ assert.equal(
     },
     { sessions: [{ conversationId: "unknown-chat", role: null, subagents: [] }] },
     roleMap,
-    null
+    null,
   ).persona,
   "",
-  "and neither do the subagents it launches"
+  "and neither do the subagents it launches",
 );
 
 assert.equal(
-  sessionInstanceBrief(
+  sessionInstanceBrief({ conversationId: "one", role: "beta", instanceIndex: 1, status: "idle" }, [
     { conversationId: "one", role: "beta", instanceIndex: 1, status: "idle" },
-    [{ conversationId: "one", role: "beta", instanceIndex: 1, status: "idle" }]
-  ),
+  ]),
   "",
-  "a lone first session does not claim a number in identity"
+  "a lone first session does not claim a number in identity",
 );
 assert.match(
-  sessionInstanceBrief(
+  sessionInstanceBrief({ conversationId: "two", role: "beta", instanceIndex: 2, status: "idle" }, [
+    { conversationId: "one", role: "beta", instanceIndex: 1, status: "idle" },
     { conversationId: "two", role: "beta", instanceIndex: 2, status: "idle" },
-    [
-      { conversationId: "one", role: "beta", instanceIndex: 1, status: "idle" },
-      { conversationId: "two", role: "beta", instanceIndex: 2, status: "idle" },
-    ]
-  ),
+  ]),
   /You are session 2 of this persona/,
-  "a sibling session names its ordinal without conversation ids"
+  "a sibling session names its ordinal without conversation ids",
 );
 
 // The stop lane: a note for a chat that just finished a turn comes back as a real message there,
@@ -144,7 +133,7 @@ fs.mkdirSync(runtimeDir(cwd), { recursive: true });
 fs.mkdirSync(path.join(cwd, ".cursor", "personas"), { recursive: true });
 fs.writeFileSync(
   path.join(cwd, ".cursor", "personas", "project-manager.md"),
-  "---\nid: project-manager\ntitle: Project Manager\nname: Wendy\n---\n"
+  "---\nid: project-manager\ntitle: Project Manager\nname: Wendy\n---\n",
 );
 fs.writeFileSync(
   path.join(runtimeDir(cwd), "current-state.json"),
@@ -154,7 +143,7 @@ fs.writeFileSync(
       { conversationId: "walk-in", role: "guide", subagents: [] },
       { conversationId: "target-chat", role: "alpha", subagents: [] },
     ],
-  })
+  }),
 );
 const named = JSON.parse(
   execFileSync("node", [script], {
@@ -165,12 +154,12 @@ const named = JSON.parse(
       prompt: "Who are you?",
     }),
     encoding: "utf8",
-  })
+  }),
 );
 assert.match(
   named.additional_context,
   /Your name is Wendy\./,
-  "the chat receives the stable name shown on its roster card"
+  "the chat receives the stable name shown on its roster card",
 );
 
 // The guide must not offer a team the project already has, so its identity carries the roster.
@@ -183,33 +172,33 @@ const guided = JSON.parse(
       prompt: "Who are you?",
     }),
     encoding: "utf8",
-  })
+  }),
 );
 assert.match(guided.additional_context, /already has a roster/);
 assert.match(guided.additional_context, /Project Manager \(Wendy\)/, "named as the roster names him");
 assert.doesNotMatch(
   guided.additional_context,
   /propose the Project Manager/,
-  "so the guide points at the manager instead of offering a second one"
+  "so the guide points at the manager instead of offering a second one",
 );
 
 const bare = fs.mkdtempSync(path.join(os.tmpdir(), "guide-bare-"));
 fs.mkdirSync(runtimeDir(bare), { recursive: true });
 fs.writeFileSync(
   path.join(runtimeDir(bare), "current-state.json"),
-  JSON.stringify({ sessions: [{ conversationId: "walk-in", role: "guide", subagents: [] }] })
+  JSON.stringify({ sessions: [{ conversationId: "walk-in", role: "guide", subagents: [] }] }),
 );
 const bareGuide = JSON.parse(
   execFileSync("node", [script], {
     cwd: bare,
     input: JSON.stringify({ hook_event_name: "beforeSubmitPrompt", conversation_id: "walk-in" }),
     encoding: "utf8",
-  })
+  }),
 );
 assert.match(
   bareGuide.additional_context,
   /declares no personas yet/,
-  "a project with no roster still hears the offer of its first persona"
+  "a project with no roster still hears the offer of its first persona",
 );
 fs.rmSync(bare, { recursive: true, force: true });
 fs.writeFileSync(
@@ -233,7 +222,7 @@ fs.writeFileSync(
     to: { kind: "session", role: "alpha", conversationId: "target-chat" },
     text: "Launch a subagent wearing the Gamma persona",
     read: false,
-  })}\n`
+  })}\n`,
 );
 
 const stop = () =>
@@ -242,7 +231,7 @@ const stop = () =>
       cwd,
       input: JSON.stringify({ hook_event_name: "stop", conversation_id: "target-chat" }),
       encoding: "utf8",
-    })
+    }),
   );
 
 const spoken = stop();
@@ -251,7 +240,7 @@ assert.doesNotMatch(spoken.followup_message, /regress login/, "a subagent's note
 assert.match(
   spoken.followup_message,
   /Board request: Launch a subagent wearing the Gamma persona/,
-  "a note this chat sent itself reads as a board request, not a handoff from a peer"
+  "a note this chat sent itself reads as a board request, not a handoff from a peer",
 );
 assert.equal(stop().followup_message, undefined, "a note is spoken once, so stop cannot loop on it");
 
@@ -263,10 +252,10 @@ for (const hook_event_name of ["beforeSubmitPrompt", "stop"]) {
         cwd,
         input: JSON.stringify({ hook_event_name, conversation_id: "cursors-own-chat" }),
         encoding: "utf8",
-      })
+      }),
     ),
     {},
-    `${hook_event_name} adds no scrum context to a chat the board never started`
+    `${hook_event_name} adds no scrum context to a chat the board never started`,
   );
 }
 fs.rmSync(cwd, { recursive: true, force: true });

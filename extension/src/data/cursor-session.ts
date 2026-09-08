@@ -10,10 +10,7 @@ export function cursorStateDbPath(): string {
     return join(homedir(), "Library/Application Support/Cursor/User/globalStorage/state.vscdb");
   }
   if (process.platform === "win32") {
-    return join(
-      process.env.APPDATA ?? join(homedir(), "AppData/Roaming"),
-      "Cursor/User/globalStorage/state.vscdb"
-    );
+    return join(process.env.APPDATA ?? join(homedir(), "AppData/Roaming"), "Cursor/User/globalStorage/state.vscdb");
   }
   return join(homedir(), ".config/Cursor/User/globalStorage/state.vscdb");
 }

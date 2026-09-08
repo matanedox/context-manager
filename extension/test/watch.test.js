@@ -13,7 +13,13 @@ const root = fs.mkdtempSync(path.join(os.tmpdir(), "agent-viz-watch-"));
 let refreshes = 0;
 const watcher = new BoardWatcher();
 // Nobody is looking, so the poll stays out of it: only the file watcher can move the counter.
-watcher.start(root, () => { refreshes += 1; }, () => ({ visible: false, agentLive: false, sincePaint: 0 }));
+watcher.start(
+  root,
+  () => {
+    refreshes += 1;
+  },
+  () => ({ visible: false, agentLive: false, sincePaint: 0 }),
+);
 
 assert.ok(fs.existsSync(runtimeDir(root)), "the runtime dir is watched, so it is created to watch");
 

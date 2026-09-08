@@ -29,7 +29,7 @@ assert.equal(shouldAutoContinue({ ...idle, status: "failed" }, true), true, "a f
 assert.equal(
   shouldAutoContinue(idle, true, false),
   false,
-  "a chat that ran no tool and touched no file has nothing to hand over"
+  "a chat that ran no tool and touched no file has nothing to hand over",
 );
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "agent-viz-recap-"));

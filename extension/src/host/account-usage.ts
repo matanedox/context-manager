@@ -46,8 +46,7 @@ export class AccountUsageFeed {
     if (openLoginIfNeeded && loaded.kind === "needsAuth") {
       await vscode.env.openExternal(vscode.Uri.parse(CURSOR_LOGIN_URL));
     }
-    this.view =
-      loaded.kind === "ready" ? { kind: "ready", ...formatUsage(loaded.reading) } : loaded;
+    this.view = loaded.kind === "ready" ? { kind: "ready", ...formatUsage(loaded.reading) } : loaded;
     this.paint();
   }
 }

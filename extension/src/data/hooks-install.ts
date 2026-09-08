@@ -2,11 +2,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-const SCRIPTS = [
-  "log-agent-event.mjs",
-  "update-agent-state.mjs",
-  "resolve-persona-context.mjs",
-];
+const SCRIPTS = ["log-agent-event.mjs", "update-agent-state.mjs", "resolve-persona-context.mjs"];
 
 const IDENTITY = "node .cursor/hooks/resolve-persona-context.mjs";
 const LOG = "node .cursor/hooks/log-agent-event.mjs";
@@ -43,23 +39,20 @@ export type HookCheck = { ready: boolean; missing: string[] };
  * the extension folder at package time.
  */
 export function hookSource(extensionPath: string): string | undefined {
-  const candidates = [
-    path.join(extensionPath, "hooks"),
-    path.join(extensionPath, "..", ".cursor", "hooks"),
-  ];
+  const candidates = [path.join(extensionPath, "hooks"), path.join(extensionPath, "..", ".cursor", "hooks")];
   return candidates.find((dir) => fs.existsSync(path.join(dir, "resolve-persona-context.mjs")));
 }
 
 /** Check every script and event required for identity, activity, and subagent tracking. */
 export function checkHooks(root: string | undefined): HookCheck {
   if (!root) return { ready: false, missing: ["workspace"] };
-  const missing = SCRIPTS.filter(
-    (name) => !fs.existsSync(path.join(root, ".cursor", "hooks", name))
-  ).map((name) => `.cursor/hooks/${name}`);
+  const missing = SCRIPTS.filter((name) => !fs.existsSync(path.join(root, ".cursor", "hooks", name))).map(
+    (name) => `.cursor/hooks/${name}`,
+  );
   try {
-    const parsed = JSON.parse(
-      fs.readFileSync(path.join(root, ".cursor", "hooks.json"), "utf8")
-    ) as { hooks?: Record<string, HookEntry[]> };
+    const parsed = JSON.parse(fs.readFileSync(path.join(root, ".cursor", "hooks.json"), "utf8")) as {
+      hooks?: Record<string, HookEntry[]>;
+    };
     for (const [event, commands] of Object.entries(WIRING)) {
       const entries = Array.isArray(parsed.hooks?.[event]) ? parsed.hooks[event] : [];
       for (const command of commands) {
@@ -91,7 +84,7 @@ function mergeConfig(root: string): void {
   const hooks = config.hooks ?? {};
   for (const [event, commands] of Object.entries(WIRING)) {
     const existing = (Array.isArray(hooks[event]) ? hooks[event] : []).filter(
-      (entry) => !RETIRED.includes(entry?.command ?? "")
+      (entry) => !RETIRED.includes(entry?.command ?? ""),
     );
     const missing = commands
       .filter((command) => !existing.some((entry) => entry?.command === command))
@@ -105,21 +98,16 @@ function mergeConfig(root: string): void {
  * Install now and report what happened. Clicking the board's own Install / Repair button is the
  * consent, so asking again in a notification only left the banner up when that toast was missed.
  */
-export async function repairHooks(
-  root: string | undefined,
-  extensionPath: string
-): Promise<boolean> {
+export async function repairHooks(root: string | undefined, extensionPath: string): Promise<boolean> {
   // Loaded lazily so the install logic above stays runnable outside the editor, i.e. under test.
   const vscode = await import("vscode");
   if (!root) {
-    void vscode.window.showWarningMessage(
-      "Open a folder first: agent hooks are installed per workspace."
-    );
+    void vscode.window.showWarningMessage("Open a folder first: agent hooks are installed per workspace.");
     return false;
   }
   if (!hookSource(extensionPath)) {
     void vscode.window.showErrorMessage(
-      `No hook scripts are bundled with this build (looked in ${path.join(extensionPath, "hooks")}). Nothing was installed.`
+      `No hook scripts are bundled with this build (looked in ${path.join(extensionPath, "hooks")}). Nothing was installed.`,
     );
     return false;
   }
@@ -128,21 +116,18 @@ export async function repairHooks(
   void vscode.window.showInformationMessage(
     ready
       ? `Installed ${written.length} hook files. New chats answer as their persona.`
-      : `Agent hooks are still incomplete: ${missing.join(", ")}`
+      : `Agent hooks are still incomplete: ${missing.join(", ")}`,
   );
   return ready;
 }
 
 /** The unprompted offer: entering a board with no hooks asks once rather than writing files itself. */
-export async function promptInstallHooks(
-  root: string | undefined,
-  extensionPath: string
-): Promise<boolean> {
+export async function promptInstallHooks(root: string | undefined, extensionPath: string): Promise<boolean> {
   if (!root || hooksInstalled(root)) return false;
   const vscode = await import("vscode");
   const choice = await vscode.window.showWarningMessage(
     "Agent hooks are missing or incomplete. Persona identity and live activity will not work.",
-    "Install / Repair"
+    "Install / Repair",
   );
   if (choice !== "Install / Repair") return false;
   return repairHooks(root, extensionPath);
@@ -154,8 +139,7 @@ export function installHooks(root: string | undefined, extensionPath: string): s
   if (!root || !source) return [];
   const target = path.join(root, ".cursor", "hooks");
   // Ignore first so git never sees copies. Skip when this workspace is the bundled source.
-  const ignored =
-    path.resolve(source) === path.resolve(target) ? [] : ensureHookGitignore(root);
+  const ignored = path.resolve(source) === path.resolve(target) ? [] : ensureHookGitignore(root);
   fs.mkdirSync(target, { recursive: true });
   const written = SCRIPTS.filter((name) => fs.existsSync(path.join(source, name))).map((name) => {
     fs.copyFileSync(path.join(source, name), path.join(target, name));
@@ -235,9 +219,7 @@ function pruneConfig(root: string): string[] {
   const ours = new Set([...Object.values(WIRING).flat(), ...RETIRED]);
   const hooks: Record<string, HookEntry[]> = {};
   for (const [event, entries] of Object.entries(config.hooks ?? {})) {
-    const kept = (Array.isArray(entries) ? entries : []).filter(
-      (entry) => !ours.has(entry?.command ?? "")
-    );
+    const kept = (Array.isArray(entries) ? entries : []).filter((entry) => !ours.has(entry?.command ?? ""));
     if (kept.length) hooks[event] = kept;
   }
   if (!Object.keys(hooks).length) {

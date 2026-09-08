@@ -54,7 +54,7 @@ function activityLog(
   parent: Role,
   roleMap: Record<string, string>,
   busyRoles: Set<Role>,
-  names: Partial<Record<Role, string>>
+  names: Partial<Record<Role, string>>,
 ) {
   const seenStart = new Set<string>();
   return events.slice(-LOG_EVENTS).flatMap((ev) => {
@@ -94,24 +94,17 @@ export function buildAgent(snapshot: BoardSnapshot, selection: Selection): Agent
   ].filter(Boolean);
   // A selected chat with no assignment reads as Onboarding, matching the rail and the
   // identity the hooks inject; the roster's first persona is only the no-selection default.
-  const role =
-    (selected ? selected.role ?? GUIDE_PERSONA.id : context.personas[0]?.id) ?? GUIDE_PERSONA.id;
+  const role = (selected ? (selected.role ?? GUIDE_PERSONA.id) : context.personas[0]?.id) ?? GUIDE_PERSONA.id;
   const persona = context.personas.find((item) => item.id === role);
   const roleNames = Object.fromEntries(
-    context.personas.map((entry) => [entry.id, roleLabel(entry.id, entry.title)])
+    context.personas.map((entry) => [entry.id, roleLabel(entry.id, entry.title)]),
   ) as Record<Role, string>;
   const activityNames = Object.fromEntries(
-    context.personas.map((entry) => [
-      entry.id,
-      personaDisplayName(entry) ?? roleLabel(entry.id, entry.title),
-    ])
+    context.personas.map((entry) => [entry.id, personaDisplayName(entry) ?? roleLabel(entry.id, entry.title)]),
   ) as Partial<Record<Role, string>>;
 
   return {
-    collaborators:
-      selected && snapshot.root
-        ? collaboratorsFor(selected, openSessions, handoffs, roleNames)
-        : [],
+    collaborators: selected && snapshot.root ? collaboratorsFor(selected, openSessions, handoffs, roleNames) : [],
     facts,
     contextMeter: contextMeter(summary, selected?.contextLimitTokens),
     contextLimitField: limit != null && limit > 0 ? tokenBudgetField(limit) : undefined,
@@ -119,13 +112,7 @@ export function buildAgent(snapshot: BoardSnapshot, selection: Selection): Agent
     canSetLimit: Boolean(selected) && !snapshot.usingDemo,
     selectedConversationId: selected?.conversationId,
     files: summary.files,
-    log: activityLog(
-      events,
-      selected?.role ?? GUIDE_PERSONA.id,
-      roleMap,
-      busyRoles,
-      activityNames
-    ),
+    log: activityLog(events, selected?.role ?? GUIDE_PERSONA.id, roleMap, busyRoles, activityNames),
     selectedRole: role,
     roleTitle: personaTitle(context, role),
     selectedPersona: {

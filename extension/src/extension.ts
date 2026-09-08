@@ -8,13 +8,16 @@ function bringBackGuide(board: ScrumBoard): void {
   const restored = restoreGuide(vscode.workspace.workspaceFolders?.[0]?.uri.fsPath);
   board.refreshAll();
   void vscode.window.showInformationMessage(
-    restored ? "Onboarding is back on the Team roster." : "Onboarding is already on the Team roster."
+    restored ? "Onboarding is back on the Team roster." : "Onboarding is already on the Team roster.",
   );
 }
 
 async function openBoard(board: ScrumBoard): Promise<void> {
-  try { await vscode.commands.executeCommand("workbench.view.extension.contextManager"); }
-  catch { /* sidebar may not be registered yet */ }
+  try {
+    await vscode.commands.executeCommand("workbench.view.extension.contextManager");
+  } catch {
+    /* sidebar may not be registered yet */
+  }
   board.refreshAll();
 }
 
@@ -29,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("contextManager.openBoard", () => openBoard(board)),
     vscode.commands.registerCommand("contextManager.installHooks", () => board.installHooks()),
     vscode.commands.registerCommand("contextManager.restoreGuide", () => bringBackGuide(board)),
-    vscode.commands.registerCommand("contextManager.removeAll", () => void board.removeAll())
+    vscode.commands.registerCommand("contextManager.removeAll", () => void board.removeAll()),
   );
 }
 

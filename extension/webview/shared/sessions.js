@@ -3,9 +3,7 @@
 /* exported renderSessions, sessionSubtitle */
 function sessionSubtitle(session, loading, loadTarget) {
   const loadingRow =
-    loading &&
-    loadTarget !== null &&
-    (session.pending ? loadTarget === "" : session.conversationId === loadTarget);
+    loading && loadTarget !== null && (session.pending ? loadTarget === "" : session.conversationId === loadTarget);
   if (loadingRow) return loading.label;
   if (session.pending) return session.shortId;
   const parts = [session.shortId];
@@ -21,15 +19,11 @@ function renderSessions(payload) {
   const sessions = document.getElementById("sessions");
   // Rows carry a ticking "3s ago", but rebuilding them mid-click cancels the click, so
   // repaint only on real changes and patch the subtitle text in place otherwise.
-  const key = JSON.stringify([
-    payload.sessions.map((session) => ({ ...session, when: "" })),
-    loading,
-    loadTarget,
-  ]);
+  const key = JSON.stringify([payload.sessions.map((session) => ({ ...session, when: "" })), loading, loadTarget]);
   if (key === sessions.dataset.key) {
     for (const session of payload.sessions) {
       const row = sessions.querySelector(
-        `[data-conversation="${CSS.escape(session.conversationId)}"] .session-copy small:last-child`
+        `[data-conversation="${CSS.escape(session.conversationId)}"] .session-copy small:last-child`,
       );
       if (row) row.textContent = sessionSubtitle(session, loading, loadTarget);
     }
@@ -55,18 +49,16 @@ function renderSessions(payload) {
           const opening = loadTarget === session.conversationId;
           // Read-only here: every row reserves the same slot so the rail reads as status, and the
           // cap that produced it is set on the agent screen beside the same number.
-          const context = `<span class="session-context${
-            session.contextOver ? " over" : ""
-          }" title="${
+          const context = `<span class="session-context${session.contextOver ? " over" : ""}" title="${
             session.context ? "Context reported by the last turn" : "No turn reported yet"
           }">${escapeHtml(session.context ?? "—")}</span>`;
           return `<div class="session-row ${session.active ? "active" : ""} ${
             session.working ? "working" : ""
           } ${session.status === "failed" ? "failed" : ""} ${opening ? "opening" : ""}">
             <button class="session-main" data-conversation="${escapeHtml(
-              session.conversationId
+              session.conversationId,
             )}" type="button" aria-pressed="${session.active}" title="${escapeHtml(
-              session.conversationId
+              session.conversationId,
             )}" ${opening ? 'aria-busy="true"' : ""}>
               ${sessionStatus(loading, session, loadTarget)}
               ${ROBOT_SVG}
@@ -77,9 +69,9 @@ function renderSessions(payload) {
             </button>
             ${context}
             <button class="session-close" data-close-conversation="${escapeHtml(
-              session.conversationId
+              session.conversationId,
             )}" type="button" aria-label="End ${escapeHtml(
-              session.name ?? session.roleLabel
+              session.name ?? session.roleLabel,
             )} session and archive its chat" title="End session and archive the chat">×</button>
           </div>`;
         })

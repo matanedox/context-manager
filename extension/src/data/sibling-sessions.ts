@@ -39,7 +39,7 @@ export function continuationNote(input: {
     parts.push(`Its recap: ${input.recap.trim()}`);
   } else {
     parts.push(
-      "That activity log is all the board carried over, not the conversation, so confirm the goal and what is left with the user before you change anything."
+      "That activity log is all the board carried over, not the conversation, so confirm the goal and what is left with the user before you change anything.",
     );
   }
   return parts.join(" ");
@@ -55,15 +55,12 @@ export function planSiblingNotes(
   sessions: SessionState[],
   newConversationId: string,
   role: Role,
-  personaLabel: string
+  personaLabel: string,
 ): SiblingNote[] {
   const created = sessions.find((session) => session.conversationId === newConversationId);
   const index = created?.instanceIndex;
   const siblings = sessions.filter(
-    (session) =>
-      session.conversationId !== newConversationId &&
-      session.role === role &&
-      session.status !== "closed"
+    (session) => session.conversationId !== newConversationId && session.role === role && session.status !== "closed",
   );
   if (!siblings.length || !index) return [];
   const newLabel = `${personaLabel} · ${index}`;

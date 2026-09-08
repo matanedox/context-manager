@@ -57,7 +57,7 @@ function dropSessions(root: string, state: StateFile, family: Set<string>): bool
     return false;
   }
   const subagentConversations = Object.fromEntries(
-    Object.entries(state.subagentConversations ?? {}).filter(([subId]) => !family.has(subId))
+    Object.entries(state.subagentConversations ?? {}).filter(([subId]) => !family.has(subId)),
   );
   fs.writeFileSync(file, JSON.stringify({ ...state, sessions, subagentConversations }, null, 2));
   return true;
@@ -95,12 +95,10 @@ export function removeRuntimeFiles(root: string | undefined): void {
  */
 export function openConversationIds(
   sessions: Array<{ conversationId: string; status: string }>,
-  usingDemo: boolean
+  usingDemo: boolean,
 ): string[] {
   if (usingDemo) return [];
-  return sessions
-    .filter((session) => session.status !== "closed")
-    .map((session) => session.conversationId);
+  return sessions.filter((session) => session.status !== "closed").map((session) => session.conversationId);
 }
 
 /** Everything this workspace ever stored, preferences included: the uninstall path. */
@@ -114,10 +112,7 @@ export function removeRuntimeState(root: string | undefined): void {
 }
 
 /** Clear one open session's visible activity without closing it or deleting its saved role. */
-export function clearConversationActivity(
-  root: string | undefined,
-  conversationId: string
-): void {
+export function clearConversationActivity(root: string | undefined, conversationId: string): void {
   if (!root) return;
   const family = conversationFamily(readStateFile(root), conversationId);
   filterJsonl(runtimeFile(root, "events.jsonl"), (row) => {

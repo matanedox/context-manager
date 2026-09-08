@@ -3,20 +3,7 @@
  * Included-Request Usage from `/api/usage`, On-Demand Usage from `/api/usage-summary`.
  * Both are shown as the dashboard shows them. Session handling lives in `cursor-session.ts`.
  */
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export type UsageReading = {
   usedRequests?: number;
@@ -54,8 +41,7 @@ export function parseUsageSummary(body: unknown, usageBody?: unknown): UsageRead
   const requests = parseRequests(usageBody);
   const onDemandDollars = dollars(onDemand?.used);
   if (requests.used === undefined && onDemandDollars === undefined) return null;
-  const end =
-    typeof record.billingCycleEnd === "string" ? new Date(record.billingCycleEnd) : undefined;
+  const end = typeof record.billingCycleEnd === "string" ? new Date(record.billingCycleEnd) : undefined;
   return {
     usedRequests: requests.used,
     totalRequests: requests.total,

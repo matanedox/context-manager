@@ -49,10 +49,7 @@ function lastActivity(session: SessionState, events: Map<string, HookEvent[]>): 
 }
 
 /** Open sessions first, each group most recently active first. */
-export function orderSessions(
-  sessions: SessionState[],
-  events: Map<string, HookEvent[]>
-): SessionState[] {
+export function orderSessions(sessions: SessionState[], events: Map<string, HookEvent[]>): SessionState[] {
   return [...sessions].sort((a, b) => {
     const openness = Number(a.status === "closed") - Number(b.status === "closed");
     if (openness !== 0) return openness;

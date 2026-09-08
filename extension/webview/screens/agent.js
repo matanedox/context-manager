@@ -9,12 +9,7 @@ function personaTags(item, personas, selectedRole) {
   }
   const title = (id) => personas.find((persona) => persona.id === id)?.title ?? id;
   return ids
-    .map(
-      (id) =>
-        `<span class="persona-tag${id === selectedRole ? " selected" : ""}">${escapeHtml(
-          title(id)
-        )}</span>`
-    )
+    .map((id) => `<span class="persona-tag${id === selectedRole ? " selected" : ""}">${escapeHtml(title(id))}</span>`)
     .join("");
 }
 
@@ -31,24 +26,16 @@ function syncContextForm(payload) {
       ["rule", "Rule"],
       ["skill", "Skill"],
       ["workflow", "Workflow"],
-      ...(payload.context?.categories ?? []).map((category) => [
-        `category:${category.id}`,
-        category.label,
-      ]),
+      ...(payload.context?.categories ?? []).map((category) => [`category:${category.id}`, category.label]),
     ];
     kindSelect.innerHTML = types
-      .map(
-        ([value, label]) =>
-          `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`
-      )
+      .map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`)
       .join("");
     kindSelect.value = types.some(([value]) => value === selectedKind) ? selectedKind : "rule";
   }
 
   const personas = payload.context?.personas ?? [];
-  const selected = new Set(
-    [...checks.querySelectorAll("input:checked")].map((input) => input.value)
-  );
+  const selected = new Set([...checks.querySelectorAll("input:checked")].map((input) => input.value));
   if (!selected.size && payload.selectedRole) selected.add(payload.selectedRole);
 
   checks.innerHTML = personas.length
@@ -62,7 +49,7 @@ function syncContextForm(payload) {
               <span class="check-ui" aria-hidden="true"></span>
             </span>
             ${escapeHtml(persona.title)}
-          </label>`
+          </label>`,
         )
         .join("")
     : '<span class="hint inline">Use + Add persona on the Team roster first.</span>';
@@ -100,11 +87,11 @@ function syncContextTabs(payload) {
         }">${escapeHtml(tab.label)}<span class="tab-count">${tab.count}</span></button>`;
         return tab.removable
           ? `<span class="ctx-tab-wrap">${button}<button type="button" class="ctx-tab-remove" data-remove-category="${escapeHtml(
-              tab.id.replace(/^category:/, "")
+              tab.id.replace(/^category:/, ""),
             )}" aria-label="Remove ${escapeHtml(tab.label)} category" title="Remove category">×</button></span>`
           : button;
       })
-      .join("")
+      .join(""),
   );
   syncAddContextUi();
 }
@@ -115,25 +102,23 @@ function contextItemRow(item, personas, selectedRole) {
     <div class="context-body">
       <span class="context-name">${escapeHtml(item.label)}</span>
       <span class="context-personas">${personaTags(item, personas, selectedRole)}</span>
-      <span class="context-meta"><span class="badge">${escapeHtml(item.type)}</span>${escapeHtml(
-        item.detail
-      )}</span>
+      <span class="context-meta"><span class="badge">${escapeHtml(item.type)}</span>${escapeHtml(item.detail)}</span>
     </div>
     <div class="context-actions">
       <button type="button" class="ctx-action ctx-favorite${item.favorite ? " active" : ""}" data-favorite-item="${escapeHtml(
-        item.id
+        item.id,
       )}" title="${item.favorite ? "Remove from favorites" : "Add to favorites"}" aria-label="${
         item.favorite ? "Remove from favorites" : "Add to favorites"
       }">★</button>
       <button type="button" class="ctx-action" data-open-context="${escapeHtml(
-        item.id
+        item.id,
       )}" title="Open file">Open</button>
       <button type="button" class="ctx-action" data-attach-context="${escapeHtml(
-        item.id
+        item.id,
       )}" title="Add to chat">Add</button>${
         removable
           ? `<button type="button" class="ctx-action ctx-delete" data-delete-context="${escapeHtml(
-              item.id
+              item.id,
             )}" title="Delete file" aria-label="Delete ${escapeHtml(item.label)}">×</button>`
           : ""
       }
@@ -151,19 +136,15 @@ function renderContext(payload) {
   paint(
     document.getElementById("context-list"),
     filtered.length
-      ? filtered
-          .map((item) => contextItemRow(item, personas, payload.selectedRole))
-          .join("")
-      : '<li class="empty">None in this tab.</li>'
+      ? filtered.map((item) => contextItemRow(item, personas, payload.selectedRole)).join("")
+      : '<li class="empty">None in this tab.</li>',
   );
 }
 
 function renderAgent(payload) {
   const charterPath = payload.selectedPersona?.charterPath;
   const persona = payload.selectedPersona;
-  const { roleLabel, name } = persona
-    ? personaLabels(persona)
-    : { roleLabel: payload.roleTitle, name: undefined };
+  const { roleLabel, name } = persona ? personaLabels(persona) : { roleLabel: payload.roleTitle, name: undefined };
   const title = persona
     ? `<span class="figure-copy"><span class="title role">${escapeHtml(roleLabel)}</span>${
         name ? `<span class="name">${escapeHtml(name)}</span>` : ""
@@ -175,25 +156,22 @@ function renderAgent(payload) {
   const closing = chat && chat.conversationId === payload.loading?.conversationId;
   const actions = closing
     ? `<span class="spinner" aria-hidden="true"></span><span class="closing-note" role="status">${escapeHtml(
-        payload.loading.label
+        payload.loading.label,
       )}</span>`
     : `${
         charterPath
           ? `<button type="button" class="edit-charter-link" data-path="${escapeHtml(
-              charterPath
+              charterPath,
             )}">Edit Persona</button>`
           : ""
       }${
         chat
           ? `<button type="button" class="focus-chat-btn" data-focus-chat title="Bring this agent's chat back into focus">Focus</button><button type="button" class="focus-chat-btn" data-close-conversation="${escapeHtml(
-              chat.conversationId
+              chat.conversationId,
             )}" title="End session and archive the chat">Close</button>`
           : ""
       }`;
-  paint(
-    document.getElementById("current"),
-    `${ROBOT_SVG}${title}<span class="current-actions">${actions}</span>`
-  );
+  paint(document.getElementById("current"), `${ROBOT_SVG}${title}<span class="current-actions">${actions}</span>`);
   document.getElementById("facts").innerHTML = (payload.facts ?? [])
     .map((fact) => {
       const live = /^Status: Working/.test(fact) || /^Tool calls: [1-9]/.test(fact);
@@ -207,7 +185,7 @@ function renderAgent(payload) {
     document.getElementById("files"),
     files.length
       ? files.map((file) => `<code>${escapeHtml(file)}</code>`).join(" ")
-      : '<span class="empty">No files touched in this session yet.</span>'
+      : '<span class="empty">No files touched in this session yet.</span>',
   );
   renderFlow(payload);
   renderGlobalRules(payload);
@@ -221,11 +199,11 @@ function renderAgent(payload) {
           .map(
             (row) =>
               `<li class="${row.hot ? "hot" : ""}"><time>${escapeHtml(row.ts)}</time> <strong>${escapeHtml(
-                row.text
-              )}</strong></li>`
+                row.text,
+              )}</strong></li>`,
           )
           .join("")
-      : "<li>No events for this session.</li>"
+      : "<li>No events for this session.</li>",
   );
   if (logged) log.scrollTop = log.scrollHeight;
 }

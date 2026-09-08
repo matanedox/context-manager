@@ -7,7 +7,7 @@ function targetRow(item, selectedId) {
   const focus =
     item.kind === "session" && item.conversationId
       ? `<button type="button" class="handoff-focus" data-focus-session="${escapeHtml(
-          item.conversationId
+          item.conversationId,
         )}" title="Open and focus that chat">Focus</button>`
       : "";
   return `<div class="handoff-row">
@@ -29,12 +29,7 @@ function targetRow(item, selectedId) {
  */
 function delegateBlock(payload) {
   const options = (payload.roster ?? [])
-    .map(
-      (item) =>
-        `<option value="${escapeHtml(item.role)}">${escapeHtml(
-          item.name ?? item.roleLabel
-        )}</option>`
-    )
+    .map((item) => `<option value="${escapeHtml(item.role)}">${escapeHtml(item.name ?? item.roleLabel)}</option>`)
     .join("");
   const form = ui.showSubagent
     ? `<p class="hint">This chat starts the subagent and keeps the conversation; it joins the
@@ -84,8 +79,7 @@ function renderFlow(payload) {
   const count = document.getElementById("flow-count");
   if (count) count.textContent = String(collaborators.length);
 
-  const target =
-    collaborators.find((item) => item.id === ui.handoffTargetId) ?? collaborators[0];
+  const target = collaborators.find((item) => item.id === ui.handoffTargetId) ?? collaborators[0];
   ui.handoffTargetId = target?.id ?? null;
   const draft = handoffDraft();
   const noteLabel = target?.lastNoteIncoming
@@ -106,7 +100,7 @@ function renderFlow(payload) {
     ui.showHandoff && target
       ? `<form class="handoff-form" id="handoff-form">
         <input type="text" name="text" placeholder="Context for ${escapeHtml(
-          target.roleLabel
+          target.roleLabel,
         )}…" autocomplete="off" required />
         <button type="submit">Send</button>
       </form>`
@@ -125,7 +119,7 @@ function renderFlow(payload) {
       </div>
       ${form}
       ${delegateBlock(payload)}
-    </div>`
+    </div>`,
   );
   if (!painted) return;
   const input = flow.querySelector('.handoff-form input[name="text"]');

@@ -12,10 +12,7 @@ export function isRole(value: string | undefined): value is Role {
   return !!value && /^[a-z][a-z0-9-]*$/.test(value);
 }
 
-export function mapRole(
-  sub: string | undefined,
-  roleMap: Record<string, string>
-): Role | null {
+export function mapRole(sub: string | undefined, roleMap: Record<string, string>): Role | null {
   if (!sub) return null;
   const mapped = roleMap[sub] ?? sub;
   return isRole(mapped) ? mapped : null;

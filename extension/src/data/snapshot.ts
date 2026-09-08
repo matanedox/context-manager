@@ -4,14 +4,7 @@ import { parseLines } from "../model/events";
 import { globalRules, type GlobalRule } from "./global-rules";
 import { readHandoffs, type ContextHandoff } from "./handoffs";
 import { checkHooks, type HookCheck } from "./hooks-install";
-import {
-  loadEvents,
-  readPendingRole,
-  readPersistedState,
-  readRoleMap,
-  readSessionSettings,
-  roleMapPath,
-} from "./io";
+import { loadEvents, readPendingRole, readPersistedState, readRoleMap, readSessionSettings, roleMapPath } from "./io";
 import { purgeConversation, purgedIds } from "./purge";
 import { personaCharterPath, workspaceContext, type WorkspaceContext } from "./workspace-context";
 
@@ -43,10 +36,7 @@ function sweepGhosts(root: string | undefined, conversationIds: string[]): void 
   }
 }
 
-export function readSnapshot(
-  root: string | undefined,
-  extensionPath: string
-): BoardSnapshot {
+export function readSnapshot(root: string | undefined, extensionPath: string): BoardSnapshot {
   const roleMap = readRoleMap(roleMapPath(root));
   const { text, usingDemo } = loadEvents(root, extensionPath);
   const persisted = readPersistedState(root);
@@ -67,7 +57,10 @@ export function readSnapshot(
   const purged = purgedIds(root);
   const ghosts = state.sessions.filter((session) => purged.has(session.conversationId));
   state.sessions = state.sessions.filter((session) => !purged.has(session.conversationId));
-  sweepGhosts(root, ghosts.map((session) => session.conversationId));
+  sweepGhosts(
+    root,
+    ghosts.map((session) => session.conversationId),
+  );
   return {
     root,
     state,
@@ -80,7 +73,7 @@ export function readSnapshot(
     // ponytail: one lookup per persona, so a roster of a few dozen is fine; cache per root if a
     // workspace ever grows a roster large enough for the stat calls to show up on a refresh.
     charterPaths: Object.fromEntries(
-      context.personas.map((persona) => [persona.id, personaCharterPath(root, persona.id)])
+      context.personas.map((persona) => [persona.id, personaCharterPath(root, persona.id)]),
     ),
   };
 }

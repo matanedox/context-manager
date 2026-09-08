@@ -51,24 +51,14 @@ const sampleState = boardState(
       { conversationId: "conv-b", role: "gamma", status: "closed", subagents: [] },
     ],
   },
-  false
+  false,
 );
 
 const repoRoot = path.resolve(__dirname, "../..");
 const repoContext = workspaceContext(repoRoot);
 
 /** Builds the snapshot viewModel takes, so each assertion names only what it varies. */
-const payloadFor = (
-  state,
-  usingDemo,
-  map,
-  selectedId,
-  context,
-  now,
-  hooksReady = true,
-  root,
-  loading
-) =>
+const payloadFor = (state, usingDemo, map, selectedId, context, now, hooksReady = true, root, loading) =>
   viewModel(
     {
       root,
@@ -81,7 +71,7 @@ const payloadFor = (
       hookCheck: { ready: hooksReady, missing: [] },
       charterPaths: {},
     },
-    { page: "agent", selectedConversationId: selectedId, now, loading }
+    { page: "agent", selectedConversationId: selectedId, now, loading },
   );
 
 module.exports = {

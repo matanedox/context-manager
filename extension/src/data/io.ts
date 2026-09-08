@@ -51,19 +51,12 @@ export function readPendingRole(root: string | undefined, now = Date.now()): Rol
 }
 
 /** The next sessionStart after this event offset claims the role exactly once. */
-export function writePendingRole(
-  root: string | undefined,
-  role: Role,
-  afterEventCount: number
-): void {
+export function writePendingRole(root: string | undefined, role: Role, afterEventCount: number): void {
   if (!root) return;
   const file = runtimeFile(root, "pending-role.json");
   try {
     fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(
-      file,
-      JSON.stringify({ role, afterEventCount, createdAt: new Date().toISOString() }, null, 2)
-    );
+    fs.writeFileSync(file, JSON.stringify({ role, afterEventCount, createdAt: new Date().toISOString() }, null, 2));
   } catch {
     /* opening chat still works if assignment persistence fails */
   }
@@ -83,17 +76,18 @@ export function clearPendingRole(root: string | undefined): void {
  * for a sessionStart hook that may never arrive. The clicked role rides along on the event: the
  * event log is the one store neither the hook reducer nor a missing state file can undo.
  */
-export function appendSessionStart(
-  root: string | undefined,
-  conversationId: string,
-  role: Role
-): void {
+export function appendSessionStart(root: string | undefined, conversationId: string, role: Role): void {
   if (!root) return;
   const file = runtimeFile(root, "events.jsonl");
   const event = {
     ts: new Date().toISOString(),
     type: "sessionStart",
-    raw: { hook_event_name: "sessionStart", conversation_id: conversationId, reason: "board_click", role },
+    raw: {
+      hook_event_name: "sessionStart",
+      conversation_id: conversationId,
+      reason: "board_click",
+      role,
+    },
   };
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.appendFileSync(file, `${JSON.stringify(event)}\n`);
@@ -123,9 +117,10 @@ export type SessionSettings = {
 export function readSessionSettings(root: string | undefined): Record<string, SessionSettings> {
   if (!root) return {};
   try {
-    return JSON.parse(
-      fs.readFileSync(runtimeFile(root, "session-settings.json"), "utf8")
-    ) as Record<string, SessionSettings>;
+    return JSON.parse(fs.readFileSync(runtimeFile(root, "session-settings.json"), "utf8")) as Record<
+      string,
+      SessionSettings
+    >;
   } catch {
     return {};
   }
@@ -135,21 +130,16 @@ export function readSessionSettings(root: string | undefined): Record<string, Se
  * The cap in force for a chat. Boards written before the settings file still carry theirs in the
  * state file, so a limit set back then keeps working instead of reading as "no cap set".
  */
-export function sessionContextLimit(
-  root: string | undefined,
-  conversationId: string
-): number | undefined {
+export function sessionContextLimit(root: string | undefined, conversationId: string): number | undefined {
   const stored = readSessionSettings(root)[conversationId]?.contextLimitTokens;
   if (stored != null) return stored;
-  return readPersistedState(root).sessions?.find(
-    (row) => row.conversationId === conversationId
-  )?.contextLimitTokens;
+  return readPersistedState(root).sessions?.find((row) => row.conversationId === conversationId)?.contextLimitTokens;
 }
 
 export function patchSessionSettings(
   root: string | undefined,
   conversationId: string,
-  patch: (settings: SessionSettings) => void
+  patch: (settings: SessionSettings) => void,
 ): boolean {
   if (!root || !conversationId) return false;
   try {
@@ -168,11 +158,7 @@ export function patchSessionSettings(
 }
 
 /** Persist the clicked persona before revealing its chat, so prompt hooks can resolve identity. */
-export function bindSessionRole(
-  root: string | undefined,
-  conversationId: string,
-  role: Role
-): boolean {
+export function bindSessionRole(root: string | undefined, conversationId: string, role: Role): boolean {
   if (!root) return false;
   try {
     const state = readPersistedState(root);
@@ -202,7 +188,7 @@ export function bindSessionRole(
 export function setSessionContextLimit(
   root: string | undefined,
   conversationId: string,
-  tokens: number | undefined
+  tokens: number | undefined,
 ): boolean {
   return patchSessionSettings(root, conversationId, (settings) => {
     if (tokens == null || !Number.isFinite(tokens) || tokens <= 0) {
@@ -219,21 +205,14 @@ export function setSessionContextLimit(
  * over every request that turn made, so the reading is spend and not window occupancy — which is
  * why a bare number reads as millions. Empty string clears the budget.
  */
-export function setSessionContextLimitField(
-  root: string | undefined,
-  conversationId: string,
-  value: string
-): boolean {
+export function setSessionContextLimitField(root: string | undefined, conversationId: string, value: string): boolean {
   if (value.trim() === "") return setSessionContextLimit(root, conversationId, undefined);
   const tokens = parseTokenBudget(value);
   if (tokens == null) return false;
   return setSessionContextLimit(root, conversationId, tokens);
 }
 
-export function loadEvents(
-  root: string | undefined,
-  extensionPath: string
-): { text: string; usingDemo: boolean } {
+export function loadEvents(root: string | undefined, extensionPath: string): { text: string; usingDemo: boolean } {
   const live = root ? runtimeFile(root, "events.jsonl") : "";
   // A log that exists but is empty is an empty board, not a board with nothing to show: reading it
   // as the latter put the bundled demo rows in the rail the moment a workspace closed its last chat.

@@ -28,9 +28,7 @@ export function showSessionInstance(session: Indexed, sessions: Indexed[]): bool
   if (n > 1) return true;
   return sessions.some(
     (other) =>
-      other.conversationId !== session.conversationId &&
-      other.role === session.role &&
-      other.status !== "closed"
+      other.conversationId !== session.conversationId && other.role === session.role && other.status !== "closed",
   );
 }
 

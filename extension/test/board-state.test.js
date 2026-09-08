@@ -14,11 +14,7 @@ const { parseTokenBudget, tokenBudgetField } = require("../out/model/token-budge
 const { event, grouped, roleMap, sampleState } = require("./fixtures");
 
 // grouping keeps conversations apart
-assert.deepEqual(
-  [...grouped.keys()],
-  ["conv-a", "conv-b"],
-  "events without a conversation are dropped"
-);
+assert.deepEqual([...grouped.keys()], ["conv-a", "conv-b"], "events without a conversation are dropped");
 assert.equal(grouped.get("conv-a").length, 3);
 assert.equal(grouped.get("conv-b").length, 4);
 
@@ -33,7 +29,7 @@ assert.equal(busy.get("big").length, 201, "a chat keeps every event it logged");
 assert.equal(
   contextSummary(busy.get("big")).inputTokens,
   300_000,
-  "so a turn logged before the 120 most recent events still counts toward the reading"
+  "so a turn logged before the 120 most recent events still counts toward the reading",
 );
 
 // context summary
@@ -87,50 +83,45 @@ const ordered = orderSessions(sessions, grouped);
 assert.deepEqual(
   ordered.map((s) => s.conversationId),
   ["conv-b", "conv-a", "closed-old"],
-  "closed sessions sort last, open sessions by most recent activity"
+  "closed sessions sort last, open sessions by most recent activity",
 );
 
 // live edges only for running subagents
 assert.deepEqual(sampleState.liveEdges, [{ from: "beta", to: "gamma", label: "bugbot" }]);
-assert.deepEqual(
-  sampleState.working.slice().sort(),
-  ["beta", "gamma"],
-  "parent and running child both blink"
-);
-assert.equal(
-  sampleState.working.includes("alpha"),
-  false,
-  "roles with no running session never blink"
-);
+assert.deepEqual(sampleState.working.slice().sort(), ["beta", "gamma"], "parent and running child both blink");
+assert.equal(sampleState.working.includes("alpha"), false, "roles with no running session never blink");
 
 // events repair a stale persisted status
 const closedByReplay = boardState(
   [event("sessionStart", "stale", 0), event("sessionEnd", "stale", 1)],
   roleMap,
   {
-    sessions: [
-      { conversationId: "stale", role: "alpha", status: "working", subagents: [] },
-    ],
+    sessions: [{ conversationId: "stale", role: "alpha", status: "working", subagents: [] }],
   },
-  false
+  false,
 );
 assert.equal(closedByReplay.sessions[0].status, "closed", "events repair stale persisted status");
 
 // An older installed hook rewrites the state file without the stored ordinal, so the board
 // renumbers a persona's chats itself rather than showing two rows with the same name.
-const unnumbered = boardState([], roleMap, {
-  sessions: [
-    { conversationId: "first", role: "alpha", status: "idle", subagents: [] },
-    { conversationId: "second", role: "alpha", status: "idle", subagents: [] },
-  ],
-}, false);
+const unnumbered = boardState(
+  [],
+  roleMap,
+  {
+    sessions: [
+      { conversationId: "first", role: "alpha", status: "idle", subagents: [] },
+      { conversationId: "second", role: "alpha", status: "idle", subagents: [] },
+    ],
+  },
+  false,
+);
 assert.deepEqual(
   unnumbered.sessions
     .slice()
     .sort((a, b) => a.conversationId.localeCompare(b.conversationId))
     .map((session) => session.instanceIndex),
   [1, 2],
-  "sessions of one persona are numbered in the order the state file lists them"
+  "sessions of one persona are numbered in the order the state file lists them",
 );
 
 // a failed tool call is its own visible state, not silent idle
@@ -142,59 +133,40 @@ const failed = boardState(
   ],
   roleMap,
   {},
-  false
+  false,
 );
 assert.equal(failed.sessions[0].status, "failed");
 
 // human-readable activity copy
-assert.equal(
-  activityDescription(event("sessionStart", "conv-a", 0), "beta", roleMap),
-  "New Beta session started"
-);
+assert.equal(activityDescription(event("sessionStart", "conv-a", 0), "beta", roleMap), "New Beta session started");
 assert.equal(
   activityDescription(event("sessionStart", "conv-a", 0), "guide", roleMap, { guide: "Ada" }),
   "New Ada session started",
-  "activity uses the persona's stable name instead of its internal role id"
+  "activity uses the persona's stable name instead of its internal role id",
 );
 assert.equal(
-  activityDescription(
-    event("subagentStart", "conv-a", 1, { subagent_type: "bugbot" }),
-    "beta",
-    roleMap
-  ),
-  "Beta delegated to Gamma (bugbot)"
+  activityDescription(event("subagentStart", "conv-a", 1, { subagent_type: "bugbot" }), "beta", roleMap),
+  "Beta delegated to Gamma (bugbot)",
 );
 assert.equal(
   activityDescription(
     event("postToolUse", "conv-a", 2, { tool_name: "Read", tool_input: { path: "x/y/file.ts" } }),
     "beta",
-    roleMap
+    roleMap,
   ),
-  "Beta researching — Read on file.ts"
+  "Beta researching — Read on file.ts",
 );
 assert.equal(
-  activityDescription(
-    event("beforeSubmitPrompt", "conv-a", 1, { composer_mode: "ask" }),
-    "beta",
-    roleMap
-  ),
-  "Beta started answering"
+  activityDescription(event("beforeSubmitPrompt", "conv-a", 1, { composer_mode: "ask" }), "beta", roleMap),
+  "Beta started answering",
 );
 assert.equal(
-  activityDescription(
-    event("postToolUse", "conv-a", 2, { tool_name: "TodoWrite" }),
-    "alpha",
-    roleMap
-  ),
-  "Alpha planning — TodoWrite"
+  activityDescription(event("postToolUse", "conv-a", 2, { tool_name: "TodoWrite" }), "alpha", roleMap),
+  "Alpha planning — TodoWrite",
 );
 assert.equal(
-  activityDescription(
-    event("sessionEnd", "conv-a", 3, { reason: "user_close" }),
-    "beta",
-    roleMap
-  ),
-  "Beta session ended (user close)"
+  activityDescription(event("sessionEnd", "conv-a", 3, { reason: "user_close" }), "beta", roleMap),
+  "Beta session ended (user close)",
 );
 
 // formatting

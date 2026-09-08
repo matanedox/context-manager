@@ -9,12 +9,7 @@ import {
   setContextCategory as setStoredContextCategory,
   toggleContextFavorite as toggleStoredContextFavorite,
 } from "../../data/context-tabs";
-import {
-  createGlobalRule,
-  CURSOR_RULES_COMMANDS,
-  globalRuleFile,
-  globalRules,
-} from "../../data/global-rules";
+import { createGlobalRule, CURSOR_RULES_COMMANDS, globalRuleFile, globalRules } from "../../data/global-rules";
 import {
   contextItemFile,
   createContextFile,
@@ -32,7 +27,7 @@ import type { BoardHandlers } from "../messages";
 /** Context and global-rule wiring for the webview, kept out of the board's own plumbing. */
 export function contextHandlers(
   refresh: () => void,
-  conversationId: () => string | undefined
+  conversationId: () => string | undefined,
 ): Pick<
   BoardHandlers,
   | "onFile"
@@ -89,10 +84,7 @@ export function openContextItem(itemId: string): void {
   void vscode.window.showTextDocument(vscode.Uri.file(resolved.absPath), { preview: true });
 }
 
-export function attachContextItem(
-  conversationId: string | undefined,
-  itemId: string
-): void {
+export function attachContextItem(conversationId: string | undefined, itemId: string): void {
   if (!conversationId || !knownContextItem(itemId)) return;
   const resolved = contextItemFile(workspaceRoot(), itemId);
   if (!resolved || !fs.existsSync(resolved.absPath)) return;
@@ -146,7 +138,7 @@ export function openCursorRules(): void {
     const command = CURSOR_RULES_COMMANDS.find((entry) => available.includes(entry));
     if (!command) {
       void vscode.window.showWarningMessage(
-        "This build has no Customize editor. Open Cursor Settings → Rules instead."
+        "This build has no Customize editor. Open Cursor Settings → Rules instead.",
       );
       return;
     }
@@ -164,10 +156,7 @@ export function addGlobalRule(name: string, description: string, refresh: () => 
   void vscode.window.showTextDocument(vscode.Uri.file(created), { preview: false });
 }
 
-export function createContext(
-  input: CreateContextInput,
-  refresh: () => void
-): void {
+export function createContext(input: CreateContextInput, refresh: () => void): void {
   const root = workspaceRoot();
   const created = createContextFile(root, input);
   if (created && input.categoryId) {
@@ -201,9 +190,7 @@ export function addPersona(input: CreatePersonaInput, refresh: () => void): void
     openContextFile(created);
     return;
   }
-  void vscode.window.showWarningMessage(
-    "Could not add persona. Use a unique kebab-case role (e.g. code-reviewer)."
-  );
+  void vscode.window.showWarningMessage("Could not add persona. Use a unique kebab-case role (e.g. code-reviewer).");
 }
 
 export function dropPersona(role: Role, refresh: () => void): void {
@@ -212,14 +199,14 @@ export function dropPersona(role: Role, refresh: () => void): void {
     if (choice !== "Remove") return;
     if (!removePersona(workspaceRoot(), role)) {
       void vscode.window.showWarningMessage(
-        "Could not remove persona. It needs a saved roster to be removed from, not the preview list."
+        "Could not remove persona. It needs a saved roster to be removed from, not the preview list.",
       );
       return;
     }
     refresh();
     if (isGuide(role)) {
       void vscode.window.showInformationMessage(
-        "Onboarding is gone. Bring it back with Context Manager: Restore onboarding."
+        "Onboarding is gone. Bring it back with Context Manager: Restore onboarding.",
       );
     }
   });

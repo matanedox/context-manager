@@ -126,9 +126,7 @@ function displayName(body: string): string | undefined {
 export function personasFromCharter(text: string): Persona[] {
   const index = roleIndex(text);
   const bodies = new Map(sections(text).map((section) => [section.id, section.body]));
-  const ids = index.size
-    ? [...index.keys()]
-    : [...bodies.keys()].filter((id) => !GENERIC_HEADINGS.has(id));
+  const ids = index.size ? [...index.keys()] : [...bodies.keys()].filter((id) => !GENERIC_HEADINGS.has(id));
   if (ids.length < 2) return [];
   return ids.map((id) => {
     const body = bodies.get(id) ?? "";
@@ -169,13 +167,15 @@ function personasFromJson(file: string): Persona[] {
     return parsed.flatMap((entry) => {
       const id = slugify(entry.id ?? "");
       return isRole(id)
-        ? [{
-            id,
-            title: entry.title ?? roleLabel(id),
-            name: entry.name?.trim() || undefined,
-            description: entry.description ?? "",
-            references: [],
-          }]
+        ? [
+            {
+              id,
+              title: entry.title ?? roleLabel(id),
+              name: entry.name?.trim() || undefined,
+              description: entry.description ?? "",
+              references: [],
+            },
+          ]
         : [];
     });
   } catch {
@@ -210,9 +210,7 @@ export function discoverPersonas(root: string | undefined): {
       return persona ? [persona] : [];
     });
   const declared = files.filter(({ text }) => declaresPersona(text));
-  const charter = files
-    .filter((entry) => !declared.includes(entry))
-    .flatMap(({ text }) => personasFromCharter(text));
+  const charter = files.filter((entry) => !declared.includes(entry)).flatMap(({ text }) => personasFromCharter(text));
   // A persona that names itself is listed alongside the charter rather than dropped: the roster
   // source stays the charter, which is still where a new persona is written.
   if (charter.length) return { personas: guided([...charter, ...own(declared)]), source: "charter" };

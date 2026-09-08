@@ -16,7 +16,7 @@ function pickTabId(before: Set<string>, ids: string[]): string | undefined {
 function hookCreatedId(
   events: ReturnType<typeof parseLines>,
   afterEventCount: number,
-  before: Set<string>
+  before: Set<string>,
 ): string | undefined {
   return [...events.slice(afterEventCount)]
     .reverse()
@@ -24,7 +24,7 @@ function hookCreatedId(
       (event) =>
         (event.type === "sessionStart" || event.raw?.hook_event_name === "sessionStart") &&
         event.raw?.conversation_id &&
-        !before.has(event.raw.conversation_id)
+        !before.has(event.raw.conversation_id),
     )?.raw?.conversation_id;
 }
 
@@ -32,7 +32,7 @@ function pickCreatedId(
   before: Set<string>,
   ids: string[],
   fromHook: string | undefined,
-  fromTabs: string | undefined
+  fromTabs: string | undefined,
 ): string | undefined {
   const fresh = newIds(before, ids);
   if (fromHook && fresh.includes(fromHook)) return fromHook;
@@ -48,7 +48,7 @@ export async function waitForCreatedChat(
   extensionPath: string,
   before: Set<string>,
   afterEventCount: number,
-  timeoutMs = 5000
+  timeoutMs = 5000,
 ): Promise<string | undefined> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {

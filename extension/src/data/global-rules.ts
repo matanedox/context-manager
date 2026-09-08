@@ -7,10 +7,7 @@ import { frontmatter, markdownFiles, metaValue, slugify } from "./md";
 export type GlobalRule = { id: string; label: string; path: string; detail: string };
 
 /** Cursor keeps User Rules in Customize; these commands are its own source of truth. */
-export const CURSOR_RULES_COMMANDS = [
-  "workbench.action.customize.openRules",
-  "workbench.action.openCustomizeEditor",
-];
+export const CURSOR_RULES_COMMANDS = ["workbench.action.customize.openRules", "workbench.action.openCustomizeEditor"];
 
 export function cursorHome(): string {
   return path.join(os.homedir(), ".cursor");
@@ -54,11 +51,7 @@ export function globalRuleFile(itemId: string, home = cursorHome()): string | nu
 }
 
 /** Writes a new always-on rule into Cursor's global rules folder and returns its absolute path. */
-export function createGlobalRule(
-  name: string,
-  description: string,
-  home = cursorHome()
-): string | null {
+export function createGlobalRule(name: string, description: string, home = cursorHome()): string | null {
   const slug = slugify(name);
   if (!slug) return null;
   const absPath = path.join(home, "rules", `${slug}.mdc`);
@@ -66,10 +59,7 @@ export function createGlobalRule(
   const summary = description.trim() || name.trim();
   try {
     fs.mkdirSync(path.dirname(absPath), { recursive: true });
-    fs.writeFileSync(
-      absPath,
-      `---\ndescription: ${summary}\nalwaysApply: true\n---\n\n${summary}\n`
-    );
+    fs.writeFileSync(absPath, `---\ndescription: ${summary}\nalwaysApply: true\n---\n\n${summary}\n`);
     return absPath;
   } catch {
     return null;

@@ -1,7 +1,8 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 
-const maxLines = ["error", { max: 250, skipBlankLines: false, skipComments: false }];
+// 300, not 250: Prettier owns the line breaks now, and its reflow costs a file some 15% in height.
+const maxLines = ["error", { max: 300, skipBlankLines: false, skipComments: false }];
 
 export default tseslint.config(
   { ignores: ["out/**", "test/**", "node_modules/**"] },

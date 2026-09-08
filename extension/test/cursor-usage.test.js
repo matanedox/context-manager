@@ -2,11 +2,7 @@
 /** npm run compile && node test/cursor-usage.test.js */
 const assert = require("node:assert/strict");
 const { formatUsage, parseRequests, parseUsageSummary } = require("../out/data/cursor-usage");
-const {
-  accountSub,
-  jwtPayload,
-  sessionCookieFromAccessToken,
-} = require("../out/data/cursor-session");
+const { accountSub, jwtPayload, sessionCookieFromAccessToken } = require("../out/data/cursor-session");
 const { pythonCommands, readToken } = require("../out/data/cursor-account");
 
 function jwtWith(payload) {
@@ -22,8 +18,11 @@ assert.equal(sessionCookieFromAccessToken("not-a-jwt"), null);
 assert.equal(sessionCookieFromAccessToken(jwtWith({})), null);
 assert.deepEqual(
   pythonCommands("win32").slice(0, 2),
-  [["py", ["-3"]], ["python", []]],
-  "Windows tries its standard Python launchers before the Unix name"
+  [
+    ["py", ["-3"]],
+    ["python", []],
+  ],
+  "Windows tries its standard Python launchers before the Unix name",
 );
 
 // No state DB is nobody logged in, so the board still offers Connect. A DB no reader can open is
@@ -72,8 +71,8 @@ assert.doesNotMatch(text, /%/, "no percentages anywhere");
 const overflowed = formatUsage(
   parseUsageSummary(
     { ...SUMMARY, individualUsage: { onDemand: { enabled: true, used: 640, limit: 7500 } } },
-    { "gpt-4": { numRequests: 500, maxRequestUsage: 500 } }
-  )
+    { "gpt-4": { numRequests: 500, maxRequestUsage: 500 } },
+  ),
 );
 assert.equal(overflowed.exhausted, true);
 assert.equal(overflowed.label, "$6.40 / $75 · 500 / 500");
@@ -83,15 +82,12 @@ assert.equal(formatUsage(parseUsageSummary(SUMMARY, undefined)).label, "$0 / $75
 assert.equal(
   formatUsage(parseUsageSummary({ individualUsage: {} }, USAGE)).label,
   "189 / 500",
-  "no on-demand card, no dollars"
+  "no on-demand card, no dollars",
 );
 
 // On-demand switched off is worth saying, and never priced against a ceiling.
 const off = formatUsage(
-  parseUsageSummary(
-    { ...SUMMARY, individualUsage: { onDemand: { enabled: false, used: 0, limit: 7500 } } },
-    USAGE
-  )
+  parseUsageSummary({ ...SUMMARY, individualUsage: { onDemand: { enabled: false, used: 0, limit: 7500 } } }, USAGE),
 );
 assert.equal(off.label, "189 / 500");
 assert.match(off.details.join("\n"), /On-Demand Usage is off/);
@@ -99,7 +95,7 @@ assert.match(off.details.join("\n"), /On-Demand Usage is off/);
 // No ceiling set at all.
 const uncapped = parseUsageSummary(
   { ...SUMMARY, individualUsage: { onDemand: { enabled: true, used: 900, limit: null } } },
-  USAGE
+  USAGE,
 );
 assert.equal(uncapped.onDemandCapDollars, undefined);
 assert.equal(formatUsage(uncapped).onDemand, "$9");

@@ -10,8 +10,7 @@ import { fileURLToPath } from "node:url";
  * gains no untracked board files. Flattened path, not a hash, so both copies derive one name.
  */
 export function runtimeDir(cwd = process.cwd()) {
-  const home =
-    process.env.CURSOR_AGENT_VIZ_HOME || path.join(os.homedir(), ".cursor", "agent-viz");
+  const home = process.env.CURSOR_AGENT_VIZ_HOME || path.join(os.homedir(), ".cursor", "agent-viz");
   let real = cwd;
   try {
     real = fs.realpathSync(cwd);
@@ -72,7 +71,7 @@ export function personaTitle(id) {
     : [];
   const bullet = new RegExp(`^\\s*[-*]\\s+\`?${id}\`?[\\s—–:-]+(.+)$`, "i");
   const desc = lines.map((line) => line.match(bullet)?.[1]?.trim()).find(Boolean);
-  return desc ? `${id} — ${desc.replace(/\.$/, "")}` : PERSONA_TITLES[id] ?? id;
+  return desc ? `${id} — ${desc.replace(/\.$/, "")}` : (PERSONA_TITLES[id] ?? id);
 }
 
 function eventType(event) {
@@ -124,10 +123,7 @@ function previousSessions() {
     assignments: new Map(
       sessions
         .filter((session) => session.conversationId && isRoleId(session.role))
-        .map((session) => [
-          session.conversationId,
-          { role: session.role, highlighted: Boolean(session.highlighted) },
-        ])
+        .map((session) => [session.conversationId, { role: session.role, highlighted: Boolean(session.highlighted) }]),
     ),
     extras: new Map(
       sessions
@@ -140,7 +136,7 @@ function previousSessions() {
             autoContinueOnLimit: session.autoContinueOnLimit,
             autoContinuedTo: session.autoContinuedTo,
           },
-        ])
+        ]),
     ),
     // Chats the board has already seen, assigned or not: only a brand new chat may take a click.
     known: new Set(sessions.map((session) => session.conversationId).filter(Boolean)),
@@ -172,22 +168,12 @@ function readPending() {
     fs.rmSync(PENDING_PATH, { force: true });
     return null;
   }
-  return pending &&
-    isRoleId(pending.role) &&
-    Number.isInteger(pending.afterEventCount) &&
-    pending.afterEventCount >= 0
+  return pending && isRoleId(pending.role) && Number.isInteger(pending.afterEventCount) && pending.afterEventCount >= 0
     ? pending
     : null;
 }
 
-export function reduceSessions(
-  events,
-  roleMap,
-  assignments,
-  pending,
-  known = new Set(),
-  extras = new Map()
-) {
+export function reduceSessions(events, roleMap, assignments, pending, known = new Set(), extras = new Map()) {
   const sessions = new Map();
   let claimedPending = false;
   let awaitingSubagentSession = null;
@@ -232,9 +218,7 @@ export function reduceSessions(
     const conversationId = event.raw?.conversation_id;
     const parentConversationId = event.raw?.parent_conversation_id;
     const sessionConversationId =
-      kind === "subagentStart" || kind === "subagentStop"
-        ? parentConversationId || conversationId
-        : conversationId;
+      kind === "subagentStart" || kind === "subagentStop" ? parentConversationId || conversationId : conversationId;
     if (!sessionConversationId) return;
     // Only a brand new session may claim a clicked role. Letting a prompt claim it let whichever
     // chat the user typed in next steal the role, which is how personas ended up on the wrong chat.
@@ -332,9 +316,7 @@ export function refreshState() {
   const lastConversationId = lastEvent?.raw?.conversation_id;
   const current = sessions.find((session) => session.conversationId === lastConversationId);
   const lastSubagent = subagentType(lastEvent);
-  const child = lastSubagent
-    ? current?.subagents.find((item) => item.type === lastSubagent)
-    : undefined;
+  const child = lastSubagent ? current?.subagents.find((item) => item.type === lastSubagent) : undefined;
   const active = child?.role ?? current?.role ?? pending?.role ?? DEFAULT_PERSONA;
   const activeTitle = personaTitle(active);
   const liveEdges = sessions.flatMap((session) =>
@@ -342,7 +324,7 @@ export function refreshState() {
       ? session.subagents
           .filter((item) => item.status === "working")
           .map((item) => ({ from: session.role, to: item.role, label: item.type }))
-      : []
+      : [],
   );
   const openSessions = sessions.filter((session) => session.status !== "closed");
 
@@ -351,11 +333,9 @@ export function refreshState() {
     activePersona: active,
     activePersonaTitle: activeTitle,
     activeSubagent: child?.status === "working" ? child.type : null,
-    workingWith: liveEdges[0]
-      ? `${liveEdges[0].from} → ${liveEdges[0].to} (${liveEdges[0].label})`
-      : null,
+    workingWith: liveEdges[0] ? `${liveEdges[0].from} → ${liveEdges[0].to} (${liveEdges[0].label})` : null,
     source: "live",
-    pendingRole: claimedPending ? null : pending?.role ?? null,
+    pendingRole: claimedPending ? null : (pending?.role ?? null),
     subagentConversations,
     sessions,
     liveEdges,

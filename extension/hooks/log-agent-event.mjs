@@ -27,7 +27,7 @@ function compact(input) {
   const raw = Object.fromEntries(KEEP.filter((key) => input[key] != null).map((key) => [key, input[key]]));
   if (input.tool_input && typeof input.tool_input === "object") {
     const toolInput = Object.fromEntries(
-      TOOL_PATHS.filter((key) => input.tool_input[key] != null).map((key) => [key, input.tool_input[key]])
+      TOOL_PATHS.filter((key) => input.tool_input[key] != null).map((key) => [key, input.tool_input[key]]),
     );
     if (Object.keys(toolInput).length) raw.tool_input = toolInput;
   }
@@ -49,6 +49,6 @@ fs.appendFileSync(
     ts: new Date().toISOString(),
     type: input.hook_event_name ?? "unknown",
     raw: compact(input),
-  })}\n`
+  })}\n`,
 );
 refreshState();

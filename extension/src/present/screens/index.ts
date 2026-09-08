@@ -22,8 +22,5 @@ export type ScreenPayload = TeamScreen & AgentScreen;
  * screens needs no round trip to the host.
  */
 export function buildScreens(snapshot: BoardSnapshot, selection: Selection): ScreenPayload {
-  return Object.assign(
-    {},
-    ...Object.values(SCREENS).map((build) => build(snapshot, selection))
-  ) as ScreenPayload;
+  return Object.assign({}, ...Object.values(SCREENS).map((build) => build(snapshot, selection))) as ScreenPayload;
 }

@@ -36,9 +36,7 @@ const GUIDE_BRIEF =
  */
 function rosterBrief() {
   const dir = path.join(".cursor", "personas");
-  const files = fs.existsSync(dir)
-    ? fs.readdirSync(dir).filter((name) => /\.(md|mdc)$/i.test(name))
-    : [];
+  const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter((name) => /\.(md|mdc)$/i.test(name)) : [];
   if (!files.length) {
     return " This project declares no personas yet, so the team you offer is its first: propose the Project Manager and ask before writing the file.";
   }
@@ -64,9 +62,7 @@ function personaName(id) {
   for (const fileName of fs.readdirSync(dir)) {
     const text = readText(path.join(dir, fileName));
     const frontmatter = text.match(/^---\s*\n([\s\S]*?)\n---/)?.[1] ?? "";
-    const declaredId =
-      frontmatter.match(/^id:\s*(.+)$/m)?.[1]?.trim() ||
-      fileName.replace(/\.(md|mdc)$/i, "");
+    const declaredId = frontmatter.match(/^id:\s*(.+)$/m)?.[1]?.trim() || fileName.replace(/\.(md|mdc)$/i, "");
     if (declaredId === id) {
       return frontmatter.match(/^name:\s*(.+)$/m)?.[1]?.trim() || undefined;
     }
@@ -80,7 +76,12 @@ function personaName(id) {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-|-$/g, "");
       if (sectionId !== id) continue;
-      return body.join("\n").match(/^\s*[-*]\s+Display name:\s*(.+)$/im)?.[1]?.trim() || undefined;
+      return (
+        body
+          .join("\n")
+          .match(/^\s*[-*]\s+Display name:\s*(.+)$/im)?.[1]
+          ?.trim() || undefined
+      );
     }
   }
   return undefined;
@@ -92,8 +93,7 @@ export function resolvePersona(input, state, roleMap, pendingRole) {
   const subagentType = input.subagentType ?? input.subagent_type ?? "";
   const subRun = state.subagentConversations?.[conversationId];
   const sessions = Array.isArray(state.sessions) ? state.sessions : [];
-  const parentId =
-    subRun?.parentConversationId ?? input.parent_conversation_id ?? conversationId;
+  const parentId = subRun?.parentConversationId ?? input.parent_conversation_id ?? conversationId;
   const session = sessions.find((row) => row.conversationId === parentId);
   const workingWith = (session?.subagents ?? [])
     .filter((child) => child.status === "working")
@@ -104,15 +104,15 @@ export function resolvePersona(input, state, roleMap, pendingRole) {
   // here, and defaulting it to the guide made every ordinary chat in the workspace answer as the
   // board — including the subagents it launched. No role, no identity, no notes.
   const claimed = isRoleId(pendingRole) && !session;
-  const role = !session?.role && !claimed
-    ? ""
-    : (subRun?.status === "working" ? subRun.role : "") ||
-      (subagentType
-        ? session?.subagents?.find((row) => row.type === subagentType)?.role ??
-          mapRole(subagentType, roleMap)
-        : "") ||
-      session?.role ||
-      (isRoleId(pendingRole) ? pendingRole : "");
+  const role =
+    !session?.role && !claimed
+      ? ""
+      : (subRun?.status === "working" ? subRun.role : "") ||
+        (subagentType
+          ? (session?.subagents?.find((row) => row.type === subagentType)?.role ?? mapRole(subagentType, roleMap))
+          : "") ||
+        session?.role ||
+        (isRoleId(pendingRole) ? pendingRole : "");
 
   return {
     persona: role,
@@ -130,10 +130,7 @@ export function sessionInstanceBrief(session, sessions) {
   if (!n || !session.role) return "";
   const rows = Array.isArray(sessions) ? sessions : [];
   const openSiblings = rows.filter(
-    (row) =>
-      row.conversationId !== session.conversationId &&
-      row.role === session.role &&
-      row.status !== "closed"
+    (row) => row.conversationId !== session.conversationId && row.role === session.role && row.status !== "closed",
   );
   if (n <= 1 && !openSiblings.length) return "";
   const others = openSiblings
@@ -152,10 +149,11 @@ export function takeHandoffs(input, state, parentId, sessionOnly = false) {
   const conversationId = input.conversation_id ?? "";
   const subagentType = input.subagentType ?? input.subagent_type ?? "";
   const subRun = state.subagentConversations?.[conversationId];
-  const working = (state.sessions ?? [])
-    .find((row) => row.conversationId === parentId)
-    ?.subagents?.filter((row) => row.status === "working")
-    .map((row) => row.type) ?? [];
+  const working =
+    (state.sessions ?? [])
+      .find((row) => row.conversationId === parentId)
+      ?.subagents?.filter((row) => row.status === "working")
+      .map((row) => row.type) ?? [];
 
   const entries = readText(HANDOFFS_FILE)
     .split("\n")
@@ -186,9 +184,7 @@ export function takeHandoffs(input, state, parentId, sessionOnly = false) {
   const taken = new Set(mine.map((row) => row.id));
   fs.writeFileSync(
     HANDOFFS_FILE,
-    `${entries
-      .map((row) => JSON.stringify(taken.has(row.id) ? { ...row, read: true } : row))
-      .join("\n")}\n`
+    `${entries.map((row) => JSON.stringify(taken.has(row.id) ? { ...row, read: true } : row)).join("\n")}\n`,
   );
   return mine;
 }
@@ -229,7 +225,7 @@ function main() {
     input,
     state,
     roleMap,
-    pendingRole
+    pendingRole,
   );
 
   const hook = input.hook_event_name ?? "";
@@ -246,7 +242,7 @@ function main() {
         ? JSON.stringify({
             followup_message: spoken.map((row) => followupLine(row, here)).join("\n\n"),
           })
-        : "{}"
+        : "{}",
     );
     return;
   }
@@ -254,10 +250,7 @@ function main() {
   // Only turns consume notes; navigation and tool hooks must not swallow them. A resume submits no
   // text — that is the board nudging an idle chat, and it takes the note here rather than leaving it
   // for stop: waiting cost a whole turn whose only content was the target saying it would look.
-  const notes =
-    hook === "beforeSubmitPrompt" || hook === "subagentStart"
-      ? takeHandoffs(input, state, parentId)
-      : [];
+  const notes = hook === "beforeSubmitPrompt" || hook === "subagentStart" ? takeHandoffs(input, state, parentId) : [];
 
   // No persona means Cursor opened this chat itself, and the scrum identity would be poison there.
   // A note the user addressed to it from the board is still delivered: that one they asked for.

@@ -105,10 +105,7 @@ async function main() {
   // Cursor archives the active chat, so the chat is focused first and then archived.
   scenario(GLASS, ["chat-1"]);
   assert.equal(await archiveChat("chat-1"), true);
-  assert.deepEqual(attempted(), [
-    ["composer.openComposer", "chat-1"],
-    ["glass.archiveActiveAgent"],
-  ]);
+  assert.deepEqual(attempted(), [["composer.openComposer", "chat-1"], ["glass.archiveActiveAgent"]]);
 
   // An archive command that names the chat needs no focus dance.
   scenario(["composer.openComposer", "composer.archiveComposer"], ["chat-2"]);
@@ -141,18 +138,14 @@ async function main() {
   assert.deepEqual(
     attempted().filter(([command]) => command === "composer.openComposer"),
     [["composer.openComposer", "chat-c", { openInNewTab: true }]],
-    "an in-flight open for an older session must not win after the user picked another"
+    "an in-flight open for an older session must not win after the user picked another",
   );
 
   // Switching sessions must not swap the previous chat out of Cursor's open list.
   scenario(["composer.openComposer"], ["chat-a"]);
   assert.equal(await openChat("chat-b"), true);
   assert.deepEqual(open, ["chat-b", "chat-a"], "openInNewTab keeps the prior session open");
-  assert.deepEqual(attempted()[0], [
-    "composer.openComposer",
-    "chat-b",
-    { openInNewTab: true },
-  ]);
+  assert.deepEqual(attempted()[0], ["composer.openComposer", "chat-b", { openInNewTab: true }]);
 
   // A persona chat is created off-screen, so Cursor's pane list cannot confirm the open. The retry
   // must not ask for a tab a second time, or one click on a persona leaves two tabs of one chat.
@@ -162,14 +155,11 @@ async function main() {
   assert.deepEqual(
     attempted().filter(([, , opts]) => opts?.openInNewTab),
     [["composer.openComposer", "chat-b", { openInNewTab: true }]],
-    "only the first open may ask for a new tab"
+    "only the first open may ask for a new tab",
   );
 
   // Cursor attaches to the focused composer, so Add has to move focus to the chat it names.
-  scenario(
-    ["composer.openComposer", "composer.focusComposer", "composer.addfilestocomposer"],
-    ["chat-a", "chat-b"]
-  );
+  scenario(["composer.openComposer", "composer.focusComposer", "composer.addfilestocomposer"], ["chat-a", "chat-b"]);
   focused = "chat-a";
   assert.equal(await attachFileToChat("chat-b", "/tmp/rule.md"), true);
   assert.deepEqual(attempted(), [
@@ -190,46 +180,42 @@ async function main() {
   // Starting another persona must not replace or end the currently working chat.
   scenario(["composer.createNew"], ["working-chat"]);
   assert.equal(await newChat(), true);
-  assert.deepEqual(attempted(), [
-    ["composer.createNew", { openInNewTab: true }],
-  ]);
+  assert.deepEqual(attempted(), [["composer.createNew", { openInNewTab: true }]]);
   assert.deepEqual(open, ["working-chat"], "creating a tab does not close the working session");
 
   // Cursor fires sessionStart before it finishes storing the composer, so a create that rejects has
   // already made a chat. Falling back to another create command is what opened a second tab.
-  scenario(["composer.createNew", "aichat.newchataction"], ["working-chat"], true, [
-    "composer.createNew",
-  ]);
+  scenario(["composer.createNew", "aichat.newchataction"], ["working-chat"], true, ["composer.createNew"]);
   assert.equal(await newChat(true), false, "a failed create is reported, not retried elsewhere");
   assert.deepEqual(
     attempted().map(([command]) => command),
     ["composer.createNew"],
-    "only one create command may run, or one persona click opens two chats"
+    "only one create command may run, or one persona click opens two chats",
   );
 
   // A build without Cursor's own create command still falls back to the chat panel action, and the
   // fallback is given the same options: without them the walkthrough opened with an empty composer.
   scenario(["aichat.newchataction"], ["working-chat"]);
   assert.equal(await newChat(false, "Hi", true), true);
-  assert.deepEqual(attempted(), [
-    ["aichat.newchataction", { partialState: { text: "Hi", richText: "Hi" } }],
-  ]);
+  assert.deepEqual(attempted(), [["aichat.newchataction", { partialState: { text: "Hi", richText: "Hi" } }]]);
 
   scenario(["composer.createNew"], ["working-chat"]);
   assert.equal(await newChat(true), true);
-  assert.deepEqual(attempted(), [[
-    "composer.createNew",
-    { openInNewTab: true, skipSelect: true, skipShowAndFocus: true },
-  ]], "hook-backed chats stay hidden while persona context is bound");
+  assert.deepEqual(
+    attempted(),
+    [["composer.createNew", { openInNewTab: true, skipSelect: true, skipShowAndFocus: true }]],
+    "hook-backed chats stay hidden while persona context is bound",
+  );
 
   // The hello waits in the composer for the user to send: a create that submits by itself would
   // make the board speak in the user's voice.
   scenario(["composer.createNew"], ["working-chat"]);
   assert.equal(await newChat(false, "Hi", true), true);
-  assert.deepEqual(attempted(), [[
-    "composer.createNew",
-    { partialState: { text: "Hi", richText: "Hi" } },
-  ]], "the walkthrough carries the text, no autoSubmit, and takes the empty tab it was created from");
+  assert.deepEqual(
+    attempted(),
+    [["composer.createNew", { partialState: { text: "Hi", richText: "Hi" } }]],
+    "the walkthrough carries the text, no autoSubmit, and takes the empty tab it was created from",
+  );
 
   const background = fs.mkdtempSync(path.join(os.tmpdir(), "agent-viz-background-"));
   fs.mkdirSync(runtimeDir(background), { recursive: true });
@@ -238,12 +224,12 @@ async function main() {
     `${JSON.stringify({
       type: "sessionStart",
       raw: { hook_event_name: "sessionStart", conversation_id: "hidden-chat" },
-    })}\n`
+    })}\n`,
   );
   assert.equal(
     await waitForCreatedChat(background, path.resolve(__dirname, ".."), new Set(), 0, 50),
     "hidden-chat",
-    "the hook event identifies a background chat before it is focused"
+    "the hook event identifies a background chat before it is focused",
   );
 
   fs.appendFileSync(
@@ -251,20 +237,20 @@ async function main() {
     `${JSON.stringify({
       type: "sessionStart",
       raw: { hook_event_name: "sessionStart", conversation_id: "new-chat" },
-    })}\n`
+    })}\n`,
   );
   open = ["old-chat"];
   assert.equal(
     await waitForCreatedChat(background, path.resolve(__dirname, ".."), new Set(["old-chat"]), 1, 50),
     "new-chat",
-    "hook wins when the tab baseline is known"
+    "hook wins when the tab baseline is known",
   );
 
   open = ["old-chat", "brand-new"];
   assert.equal(
     await waitForCreatedChat(background, path.resolve(__dirname, ".."), new Set(["old-chat"]), 0, 50),
     "brand-new",
-    "foreground picks the new tab when the baseline is known"
+    "foreground picks the new tab when the baseline is known",
   );
 
   // A workspace with no session log falls back to the bundled demo, whose events carry
@@ -274,12 +260,12 @@ async function main() {
   assert.equal(
     await waitForCreatedChat(demoOnly, path.resolve(__dirname, ".."), new Set(), 0, 50),
     undefined,
-    "demo events never identify a chat Cursor created"
+    "demo events never identify a chat Cursor created",
   );
   assert.equal(
     await waitForCreatedChat(demoOnly, path.resolve(__dirname, ".."), new Set(["old-chat"]), 0, 50),
     "real-chat",
-    "the real new tab still wins over the demo log"
+    "the real new tab still wins over the demo log",
   );
   fs.rmSync(demoOnly, { recursive: true, force: true });
 
@@ -287,13 +273,13 @@ async function main() {
   fs.mkdirSync(runtimeDir(noHook), { recursive: true });
   fs.writeFileSync(
     runtimeFile(noHook, "events.jsonl"),
-    `${JSON.stringify({ type: "beforeSubmitPrompt", raw: { conversation_id: "old-chat" } })}\n`
+    `${JSON.stringify({ type: "beforeSubmitPrompt", raw: { conversation_id: "old-chat" } })}\n`,
   );
   open = ["old-chat"];
   assert.equal(
     await waitForCreatedChat(noHook, path.resolve(__dirname, ".."), new Set(), 0, 50),
     undefined,
-    "an empty tab baseline does not treat an existing chat as newly created"
+    "an empty tab baseline does not treat an existing chat as newly created",
   );
   fs.rmSync(noHook, { recursive: true, force: true });
   fs.rmSync(background, { recursive: true, force: true });
@@ -311,29 +297,29 @@ async function main() {
       { type: "beforeSubmitPrompt", raw: { conversation_id: "working-chat" } },
     ]
       .map((event) => JSON.stringify(event))
-      .join("\n")
+      .join("\n"),
   );
   assert.deepEqual(
     leftoverTabs(
       strays,
       path.resolve(__dirname, ".."),
       new Set(["idle-chat", "persona-chat", "working-chat", "new-chat"]),
-      "new-chat"
+      "new-chat",
     ),
     ["idle-chat"],
-    "only an untouched, unassigned chat loses its tab: never the new one, a persona's, or a busy one"
+    "only an untouched, unassigned chat loses its tab: never the new one, a persona's, or a busy one",
   );
   assert.deepEqual(
     leftoverTabs(strays, path.resolve(__dirname, ".."), new Set(), "new-chat"),
     [],
-    "a chat that was not already open is not Cursor's leftover"
+    "a chat that was not already open is not Cursor's leftover",
   );
   // A window opening lists its empty composer only after the board took its baseline, so the
   // cleanup passes the tabs open at that point too and the walkthrough stops leaving one behind.
   assert.deepEqual(
     leftoverTabs(strays, path.resolve(__dirname, ".."), new Set(["idle-chat", "new-chat"]), "new-chat"),
     ["idle-chat"],
-    "an empty tab Cursor listed late is still a leftover"
+    "an empty tab Cursor listed late is still a leftover",
   );
   fs.rmSync(strays, { recursive: true, force: true });
 
@@ -343,11 +329,7 @@ async function main() {
   const token = loading.begin("Loading context…");
   assert.equal(await loading.finish(token, 0), true);
   phases.push("open");
-  assert.deepEqual(
-    phases,
-    ["loading", "done", "open"],
-    "the inline loader is painted done before the chat may open"
-  );
+  assert.deepEqual(phases, ["loading", "done", "open"], "the inline loader is painted done before the chat may open");
 
   // A chat closed in Cursor is reaped, and its loader has to outlive the state it spins on: purging
   // first let a repaint inside the hold drop the row, so the close showed no loader at all.
@@ -355,7 +337,7 @@ async function main() {
   fs.mkdirSync(runtimeDir(closing), { recursive: true });
   fs.writeFileSync(
     runtimeFile(closing, "events.jsonl"),
-    `${JSON.stringify({ type: "sessionEnd", raw: { conversation_id: "gone-chat" } })}\n`
+    `${JSON.stringify({ type: "sessionEnd", raw: { conversation_id: "gone-chat" } })}\n`,
   );
   resetClosingForTests();
   // The last purge leaves the log in place but empty, so the chat's own lines are the probe.
@@ -388,7 +370,7 @@ async function main() {
       ["hold", true],
       ["finish", false],
     ],
-    "the chat is on the board for the whole hold and purged before the loader clears, so its row never comes back"
+    "the chat is on the board for the whole hold and purged before the loader clears, so its row never comes back",
   );
   fs.rmSync(closing, { recursive: true, force: true });
 
@@ -398,7 +380,7 @@ async function main() {
   fs.mkdirSync(runtimeDir(stale), { recursive: true });
   fs.writeFileSync(
     runtimeFile(stale, "events.jsonl"),
-    `${JSON.stringify({ type: "sessionEnd", raw: { conversation_id: "stale-chat" } })}\n`
+    `${JSON.stringify({ type: "sessionEnd", raw: { conversation_id: "stale-chat" } })}\n`,
   );
   resetClosingForTests();
   const quiet = [];
@@ -409,14 +391,14 @@ async function main() {
       refresh: () => {},
       deselect: () => {},
     },
-    [{ conversationId: "stale-chat", status: "closed" }]
+    [{ conversationId: "stale-chat", status: "closed" }],
   );
   await new Promise((resolve) => setTimeout(resolve, 20));
   assert.deepEqual(quiet, [], "a row already closed when the board starts never reaches the rail");
   assert.equal(
     fs.readFileSync(runtimeFile(stale, "events.jsonl"), "utf8").includes("stale-chat"),
     false,
-    "and it is purged all the same"
+    "and it is purged all the same",
   );
   fs.rmSync(stale, { recursive: true, force: true });
 
@@ -428,7 +410,7 @@ async function main() {
   fs.mkdirSync(path.join(beside, ".cursor", "personas"), { recursive: true });
   fs.writeFileSync(
     path.join(beside, ".cursor", "personas", "alpha.md"),
-    "---\nid: alpha\ntitle: Alpha\ndescription: Owns alpha.\n---\n\nOwns alpha.\n"
+    "---\nid: alpha\ntitle: Alpha\ndescription: Owns alpha.\n---\n\nOwns alpha.\n",
   );
   fs.mkdirSync(runtimeDir(beside), { recursive: true });
   fs.writeFileSync(
@@ -436,22 +418,17 @@ async function main() {
     `${JSON.stringify({
       type: "sessionStart",
       raw: { hook_event_name: "sessionStart", conversation_id: "old-chat", role: "alpha" },
-    })}\n`
+    })}\n`,
   );
   fs.writeFileSync(
     runtimeFile(beside, "current-state.json"),
     JSON.stringify({
       sessions: [{ conversationId: "old-chat", role: "alpha", status: "idle", subagents: [] }],
-    })
+    }),
   );
   scenario(
-    [
-      "composer.createNew",
-      "composer.openComposer",
-      "composer.focusComposer",
-      "composer.resumeCurrentChat",
-    ],
-    ["old-chat"]
+    ["composer.createNew", "composer.openComposer", "composer.focusComposer", "composer.resumeCurrentChat"],
+    ["old-chat"],
   );
   created = "new-chat";
   startRoleSession(
@@ -465,7 +442,7 @@ async function main() {
       showAgentPage: () => {},
     },
     "alpha",
-    "You are a second chat for Alpha, opened beside Alpha session 1."
+    "You are a second chat for Alpha, opened beside Alpha session 1.",
   );
   await runChatTask(async () => {});
   const order = attempted().map(([command, id]) => `${command} ${id ?? ""}`.trim());
@@ -473,12 +450,12 @@ async function main() {
   // is the whole guarantee about which chat wakes up.
   assert.ok(
     !order.includes("composer.focusComposer old-chat"),
-    "the session it was opened beside is never focused, so no resume can land in it"
+    "the session it was opened beside is never focused, so no resume can land in it",
   );
   assert.deepEqual(
     order.slice(-2),
     ["composer.focusComposer new-chat", "composer.resumeCurrentChat"],
-    "the caret ends up in the new chat and the resume there delivers the brief without a user send"
+    "the caret ends up in the new chat and the resume there delivers the brief without a user send",
   );
   assert.equal(focused, "new-chat", "the new chat is the one on screen");
   const note = fs
@@ -490,7 +467,7 @@ async function main() {
   assert.match(
     note.text,
     /Another Alpha session opened/,
-    "the neighbour is still told, it just reads the note on its own next turn"
+    "the neighbour is still told, it just reads the note on its own next turn",
   );
   fs.rmSync(beside, { recursive: true, force: true });
 
