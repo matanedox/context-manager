@@ -7,8 +7,10 @@
  * reappears after a window reload.
  */
 const HELP_PARAGRAPHS = [
-	'<strong>Limit</strong> sets a spending cap (examples: <code>80k</code> or <code>5M</code>). A plain number is millions. Blank is no limit.',
-	'The reading is lifetime tokens used, not how full the current context window is.',
+	'<strong>Tokens spent</strong> is every prompt this chat has paid for, added up across its turns: ten turns of a 30k prompt read as 300k. The cached share is how much of that came from cache rather than being charged again.',
+	'One call is <strong>one agent reply</strong>, however many tool calls it made along the way — the reading grows once per reply, when Cursor reports what that turn cost. Tool calls are counted separately, up in the facts. Every reply re-sends the conversation so far, which is why this climbs faster than the chat looks.',
+	'<strong>Context window</strong> is a different number — how full the current turn is, which drops whenever Cursor summarizes. Only Cursor reports it: <button type="button" data-focus-chat>open this chat</button>, then click the context usage indicator in its composer toolbar.',
+	'<strong>Limit</strong> caps the spend above, not the window (examples: <code>80k</code> or <code>5M</code>). A plain number is millions. Blank is no limit.',
 	'<strong>Auto</strong> requires a limit. When it is hit, this chat is asked for a recap, then a new chat opens with the same persona. It carries over files, tool-call count, the reading, and the recap if ready.',
 	'The new chat is briefed and starts on its own; the thread itself is never copied. It keeps the limit but not the checkbox, so one tick is one replacement. Board-started chats only.',
 	'A limit below what a single turn costs puts the replacement over the moment it answers, so set it above the reading a normal turn adds.',
@@ -40,6 +42,16 @@ function renderContextMeter(payload) {
 			? `<span class="context-meter-track"><span class="context-meter-fill"></span></span>`
 			: '';
 	const label = reading ? reading.label : 'No context reported yet';
+	// The reading opens the same explanation as `?`; its link focuses the chat, where Cursor owns
+	// the context-usage popup.
+	const copy = `<span class="context-meter-kicker">Tokens spent</span><span class="context-meter-label">${escapeHtml(
+		label
+	)}</span>`;
+	const readingCopy = payload.canSetLimit
+		? `<button type="button" class="context-meter-copy" data-toggle-context-help aria-expanded="${
+				ui.showContextHelp
+			}" aria-controls="context-help-panel" title="What tokens spent, the context window, Limit, and Auto do">${copy}</button>`
+		: `<span class="context-meter-copy">${copy}</span>`;
 	const limit = payload.canSetLimit
 		? `<label class="context-limit" title="Cap spend for this chat: 80k or 5M. Blank for none.">
         <span>Limit</span>
@@ -59,9 +71,9 @@ function renderContextMeter(payload) {
       </label>
       <button type="button" class="context-help" data-toggle-context-help aria-expanded="${
 			ui.showContextHelp
-		}" aria-controls="context-help-panel" title="What Limit and Auto do">?</button>`
+		}" aria-controls="context-help-panel" title="What tokens spent, the context window, Limit, and Auto do">?</button>`
 		: '';
-	paint(meter, `${bar}<span class="context-meter-label">${escapeHtml(label)}</span>${limit}`);
+	paint(meter, `${readingCopy}${bar}${limit}`);
 	// The width is set here rather than in the painted html: the webview CSP has no 'unsafe-inline',
 	// so a style attribute is dropped and the fill falls back to the full track.
 	const fillEl = meter.querySelector('.context-meter-fill');

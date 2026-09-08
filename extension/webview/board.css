@@ -8,6 +8,7 @@ body {
 body {
 	font-family: var(--vscode-font-family, system-ui);
 	margin: 0;
+	overflow-x: hidden;
 	padding: 10px 12px;
 	color: var(--vscode-foreground);
 	display: flex;
@@ -597,7 +598,7 @@ h3 {
 .handoff-row {
 	display: flex;
 	align-items: stretch;
-	gap: 4px;
+	gap: 8px;
 }
 .handoff-row .handoff-target {
 	flex: 1;
@@ -663,6 +664,7 @@ h3 {
 .handoff-bar {
 	display: flex;
 	align-items: center;
+	flex-wrap: wrap;
 	gap: 8px;
 }
 .handoff-bar > :first-child {
@@ -856,6 +858,7 @@ h3 {
 .context-meter {
 	display: flex;
 	align-items: center;
+	flex-wrap: wrap;
 	gap: 8px;
 	font-size: 10px;
 	flex: none;
@@ -879,9 +882,39 @@ h3 {
 .context-meter.over .context-meter-fill {
 	background: var(--vscode-editorWarning-foreground, #cca700);
 }
+.context-meter-copy {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+button.context-meter-copy {
+	padding: 0;
+	margin: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	color: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+button.context-meter-copy:hover .context-meter-label,
+button.context-meter-copy:focus-visible .context-meter-label {
+	opacity: 1;
+	text-decoration: underline;
+}
+.context-meter-kicker {
+	font-size: 9px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	opacity: 0.8;
+}
+/* Quieter than the label above it: the numbers are the detail, not the heading. */
 .context-meter-label {
-	flex: none;
-	opacity: 0.85;
+	font-size: 8px;
+	opacity: 0.5;
+	font-variant-numeric: tabular-nums;
 }
 .context-limit {
 	display: flex;
@@ -993,6 +1026,15 @@ h3 {
 .context-help-panel code {
 	font-size: 9px;
 }
+.context-help-panel button {
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	cursor: pointer;
+	color: var(--vscode-textLink-foreground, #3794ff);
+	text-decoration: underline;
+}
 .context-full {
 	display: flex;
 	align-items: center;
@@ -1061,7 +1103,7 @@ h3 {
 	flex: none;
 }
 .edit-charter-link {
-	padding: 0;
+	padding: 3px 4px;
 	margin: 0;
 	border: 0;
 	background: none;
@@ -1094,9 +1136,14 @@ h3 {
 .current-actions {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	flex-wrap: wrap;
+	gap: 8px;
 	flex: 0 0 auto;
 	margin-left: auto;
+}
+.current-actions > * {
+	flex: none;
+	white-space: nowrap;
 }
 .closing-note {
 	font-size: 10px;
@@ -1126,7 +1173,7 @@ h3 {
 .facts {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 6px;
+	gap: 8px;
 	font-size: 10px;
 	flex: none;
 	margin: 0;
@@ -1147,7 +1194,7 @@ h3 {
 .files {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 4px;
+	gap: 6px;
 	font-size: 10px;
 	opacity: 0.8;
 }
@@ -1302,16 +1349,18 @@ h3 {
 }
 .global-actions {
 	display: flex;
-	gap: 6px;
+	flex-wrap: wrap;
+	gap: 8px;
 }
 .add-global {
 	display: flex;
-	gap: 6px;
+	flex-wrap: wrap;
+	gap: 8px;
 	margin: 6px 0 0;
 }
 .add-global input {
 	flex: 1;
-	min-width: 0;
+	min-width: 7em;
 	font: inherit;
 	font-size: 10px;
 	color: inherit;
@@ -1525,7 +1574,7 @@ h3 {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	gap: 4px;
+	gap: 8px;
 	flex: none;
 }
 .ctx-action {
@@ -1555,9 +1604,15 @@ h3 {
 	border-color: var(--vscode-focusBorder, #0078d4);
 }
 .ctx-delete {
-	padding: 3px 8px;
-	font-size: 11px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 3px 6px;
 	opacity: 0.75;
+}
+.ctx-trash {
+	width: 13px;
+	height: 13px;
 }
 .ctx-delete:hover {
 	opacity: 1;
@@ -1669,6 +1724,12 @@ time {
 	}
 	.context-actions {
 		justify-content: flex-end;
+	}
+	.add-context {
+		grid-template-columns: 1fr;
+	}
+	.span-2 {
+		grid-column: span 1;
 	}
 	.handoff-target {
 		padding: 5px 6px;

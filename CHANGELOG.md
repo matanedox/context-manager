@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.1
+
+The agent screen now labels cumulative prompt usage as **Tokens spent**, explains how replies,
+tool calls, caching, the context window, Limit, and Auto differ, and opens that explanation from
+either the reading or its help button. The reading is smaller and quieter, while its progress bar
+follows the text.
+
+Narrow boards now wrap controls instead of clipping them, with roomier action spacing and a
+theme-safe context delete icon.
+
 ## 0.2.0
 
 Windows support. The board was unusable there for two independent reasons, both fixed.

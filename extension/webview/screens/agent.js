@@ -1,6 +1,10 @@
 /** Context tabs, the add-context form, and the agent detail screen. */
 /* global ui, paint, escapeHtml, ROBOT_SVG, personaLabels, renderFlow, renderGlobalRules, renderContextMeter */
 /* exported renderAgent, renderContext, personaTags, syncContextForm, syncAddContextUi, contextItemRow */
+/** Drawn rather than a glyph: the webview cannot count on an emoji trash rendering in every theme font. */
+const TRASH_SVG = `<svg class="ctx-trash" viewBox="0 0 16 16" aria-hidden="true">
+  <path d="M6.5 2.5h3M2.5 4.5h11M4.5 4.5l.6 8.2a1 1 0 0 0 1 .8h3.8a1 1 0 0 0 1-.8l.6-8.2M6.8 7v4M9.2 7v4"
+    fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 function personaTags(item, personas, selectedRole) {
 	const ids = [...new Set([...(item.personas ?? []), ...(item.referencedBy ?? [])])];
 	if (!ids.length) {
@@ -121,7 +125,7 @@ function contextItemRow(item, personas, selectedRole) {
 			removable
 				? `<button type="button" class="ctx-action ctx-delete" data-delete-context="${escapeHtml(
 						item.id
-					)}" title="Delete file" aria-label="Delete ${escapeHtml(item.label)}">×</button>`
+					)}" title="Delete file" aria-label="Delete ${escapeHtml(item.label)}">${TRASH_SVG}</button>`
 				: ''
 		}
     </div>

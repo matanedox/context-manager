@@ -107,6 +107,16 @@ assert.match(
 	'the budget field carries its own unit: the reading is spend across the chat, not window size'
 );
 assert.match(webviewScript, /data-toggle-context-help/, 'the meter explains itself in a panel');
+assert.match(
+	webviewScript,
+	/context-meter-kicker">Tokens spent</,
+	'the reading is labelled as spend: calling it the context window read as how full the window is'
+);
+assert.match(
+	webviewScript,
+	/class="context-meter-copy" data-toggle-context-help/,
+	'the reading opens the same explanation as the help button'
+);
 assert.match(webviewScript, /data-connect-usage/, 'unsigned usage offers a connect button');
 assert.match(webviewScript, /data-refresh-usage/, 'usage has a refresh control next to the info button');
 assert.match(
