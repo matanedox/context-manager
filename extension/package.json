@@ -4,7 +4,7 @@
   "description": "Map and manage project context through agent personas",
   "version": "0.1.0",
   "publisher": "local",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": { "vscode": "^1.85.0" },
   "categories": ["Other"],
   "activationEvents": ["onStartupFinished", "onCommand:contextManager.openBoard"],
