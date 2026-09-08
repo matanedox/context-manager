@@ -25,3 +25,5 @@ wears, not separate bots.**
 | ![Team board: usage, roster, sessions](docs/board.png) | ![Agent detail: current agent, tagged rules, activity](docs/agent.png) |
 
 Install, layers, what it writes on disk, commands, screens and limits: **[PRODUCT.md](./PRODUCT.md)**.
+
+Cutting a version: **[docs/RELEASING.md](./docs/RELEASING.md)**.
