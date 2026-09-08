@@ -1,3 +1,9 @@
+---
+description: Cut a Context Manager version — test, bump, changelog, package, push, install.
+alwaysApply: false
+personas: extension-engineer
+---
+
 # Releasing
 
 Every step runs from a clean tree with the change already made. `*.vsix` is gitignored, so the

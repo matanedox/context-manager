@@ -26,4 +26,5 @@ wears, not separate bots.**
 
 Install, layers, what it writes on disk, commands, screens and limits: **[PRODUCT.md](./PRODUCT.md)**.
 
-Cutting a version: **[docs/RELEASING.md](./docs/RELEASING.md)**.
+Cutting a version: **[.cursor/workflows/releasing.md](./.cursor/workflows/releasing.md)**, which the
+board also lists under **Workflow** for the Extension Engineer.
