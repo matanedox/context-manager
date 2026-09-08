@@ -1,0 +1,11 @@
+{"ts":"2026-08-20T13:00:00Z","type":"sessionStart","raw":{"hook_event_name":"sessionStart","conversation_id":"demo-one","model":"auto-smart","composer_mode":"agent"}}
+{"ts":"2026-08-20T13:00:03Z","type":"beforeSubmitPrompt","raw":{"hook_event_name":"beforeSubmitPrompt","conversation_id":"demo-one"}}
+{"ts":"2026-08-20T13:00:05Z","type":"postToolUse","raw":{"hook_event_name":"postToolUse","tool_name":"Read","conversation_id":"demo-one","tool_input":{"path":"extension/src/extension.ts"}}}
+{"ts":"2026-08-20T13:00:09Z","type":"postToolUse","raw":{"hook_event_name":"postToolUse","tool_name":"Grep","conversation_id":"demo-one","tool_input":{"path":"extension/src"}}}
+{"ts":"2026-08-20T13:00:12Z","type":"subagentStart","raw":{"hook_event_name":"subagentStart","subagentType":"explore","conversation_id":"demo-one","parent_conversation_id":"demo-one"}}
+{"ts":"2026-08-20T13:00:18Z","type":"postToolUse","raw":{"hook_event_name":"postToolUse","tool_name":"Read","subagentType":"explore","conversation_id":"demo-one","tool_input":{"path":".cursor/hooks/update-agent-state.mjs"}}}
+{"ts":"2026-08-20T13:00:30Z","type":"sessionStart","raw":{"hook_event_name":"sessionStart","conversation_id":"demo-two","model":"auto-smart","composer_mode":"agent"}}
+{"ts":"2026-08-20T13:00:33Z","type":"beforeSubmitPrompt","raw":{"hook_event_name":"beforeSubmitPrompt","conversation_id":"demo-two"}}
+{"ts":"2026-08-20T13:00:36Z","type":"postToolUse","raw":{"hook_event_name":"postToolUse","tool_name":"Shell","conversation_id":"demo-two","tool_input":{"path":"extension/package.json"}}}
+{"ts":"2026-08-20T13:00:44Z","type":"afterAgentResponse","raw":{"hook_event_name":"afterAgentResponse","conversation_id":"demo-two","model":"auto-smart","input_tokens":48203,"output_tokens":154,"cache_read_tokens":23680,"cache_write_tokens":0}}
+{"ts":"2026-08-20T13:01:02Z","type":"sessionEnd","raw":{"hook_event_name":"sessionEnd","conversation_id":"demo-two","reason":"user_close","final_status":"completed","duration_ms":2213}}

@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      { "command": ".cursor/hooks/log-agent-event.sh" },
+      { "command": ".cursor/hooks/inject-persona-context.sh" }
+    ],
+    "sessionEnd": [{ "command": ".cursor/hooks/log-agent-event.sh" }],
+    "beforeSubmitPrompt": [
+      { "command": ".cursor/hooks/log-agent-event.sh" },
+      { "command": ".cursor/hooks/inject-persona-context.sh" }
+    ],
+    "stop": [{ "command": ".cursor/hooks/inject-persona-context.sh" }],
+    "subagentStart": [
+      { "command": ".cursor/hooks/log-agent-event.sh" },
+      { "command": ".cursor/hooks/inject-persona-context.sh" }
+    ],
+    "subagentStop": [
+      { "command": ".cursor/hooks/log-agent-event.sh" },
+      { "command": ".cursor/hooks/inject-persona-context.sh" }
+    ],
+    "postToolUseFailure": [{ "command": ".cursor/hooks/log-agent-event.sh" }],
+    "postToolUse": [{ "command": ".cursor/hooks/log-agent-event.sh" }],
+    "afterAgentResponse": [{ "command": ".cursor/hooks/log-agent-event.sh" }]
+  }
+}

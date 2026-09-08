@@ -1,0 +1,66 @@
+{
+  "name": "agent-context",
+  "displayName": "Context Manager",
+  "description": "Map and manage project context through agent personas",
+  "version": "0.1.0",
+  "publisher": "local",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished", "onCommand:contextManager.openBoard"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "contextManager.openBoard",
+        "title": "Context Manager: Open Board",
+        "icon": "$(organization)"
+      },
+      {
+        "command": "contextManager.installHooks",
+        "title": "Context Manager: Install Agent Hooks In This Workspace"
+      },
+      {
+        "command": "contextManager.restoreGuide",
+        "title": "Context Manager: Restore onboarding"
+      },
+      {
+        "command": "contextManager.removeAll",
+        "title": "Context Manager: Remove Agent Hooks And Board Data"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "contextManager",
+          "title": "Context Manager",
+          "icon": "media/scrum.svg"
+        }
+      ]
+    },
+    "views": {
+      "contextManager": [
+        {
+          "type": "webview",
+          "id": "contextManager.board",
+          "name": " "
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:uninstall": "node ./out/uninstall.js",
+    "vscode:prepublish": "mkdir -p hooks && cp ../.cursor/hooks/log-agent-event.sh ../.cursor/hooks/inject-persona-context.sh ../.cursor/hooks/update-agent-state.mjs ../.cursor/hooks/resolve-persona-context.mjs hooks/ && npm run compile",
+    "compile": "tsc -p .",
+    "watch": "tsc -watch -p .",
+    "lint": "eslint src webview",
+    "test": "tsc -p . && node test/layers.test.js && node test/board-state.test.js && node test/view-model.test.js && node test/workspace-context.test.js && node test/io.test.js && node test/auto-continue.test.js && node test/watch.test.js && node test/hooks-install.test.js && node test/cursor-chat.test.js && node test/handoffs.test.js && node test/cursor-usage.test.js && node ../.cursor/hooks/update-agent-state.test.mjs && node ../.cursor/hooks/resolve-persona-context.test.mjs && bash ../.cursor/hooks/inject-persona-context.test.sh && npm run lint"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.16.0",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "eslint": "^9.16.0",
+    "typescript": "^5.4.0",
+    "typescript-eslint": "^8.18.0"
+  }
+}

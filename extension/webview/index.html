@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src {{cspSource}}; script-src 'nonce-{{nonce}}';" />
+  <link rel="stylesheet" href="{{cssUri}}" />
+</head>
+<body>
+  <div class="hook-bar" id="hook-bar">
+    <span id="hook-warning" role="alert" hidden>Agent hooks are missing or incomplete. Persona identity and live activity will not work.</span>
+    <button type="button" data-repair-hooks aria-label="Install / Repair" title="Reinstall the hooks, closing every open session and clearing all saved board data">
+      <span class="hook-icon" aria-hidden="true">&#9881;</span>
+      <span class="hook-label">Install / Repair</span>
+    </button>
+  </div>
+  <div id="screen-team" class="screen" hidden>
+    <h2>Usage</h2>
+    <div class="account-usage" id="account-usage"></div>
+    <div class="context-help-panel" id="account-usage-help" hidden></div>
+    <h2>Team</h2>
+    <p class="banner" id="banner"></p>
+
+    <section class="panel setup-panel" id="team-setup" hidden>
+      <h2 class="panel-title">Set up your team</h2>
+      <p class="hint">No persona files in this workspace yet. Add one with <strong>+ Add persona</strong>, or describe your roles in <code>.cursor/personas/</code>.</p>
+    </section>
+
+    <p class="hint" id="roster-hint">Click a figure to start a chat as that role.</p>
+    <div class="roster" id="roster"></div>
+
+    <section class="panel" id="add-persona-panel" hidden>
+      <h2 class="panel-title">Add persona</h2>
+      <p class="hint">Role becomes the id (kebab-case). Name is this persona's stable identity.</p>
+      <form class="add-persona" id="add-persona">
+        <label class="field">
+          <span>Role</span>
+          <input name="role" type="text" required placeholder="e.g. code-reviewer" autocomplete="off" />
+        </label>
+        <label class="field">
+          <span>Role summary</span>
+          <input name="description" type="text" placeholder="What this persona owns (optional)" autocomplete="off" />
+        </label>
+        <label class="field">
+          <span>Name</span>
+          <input name="name" type="text" required placeholder="e.g. Kai" autocomplete="off" />
+        </label>
+        <button type="submit" class="add-persona-submit">Add persona</button>
+      </form>
+    </section>
+
+    <h2>Sessions</h2>
+    <div id="sessions"></div>
+  </div>
+
+  <div id="screen-agent" class="screen" hidden>
+    <button class="back" id="back" type="button">&larr; Team</button>
+    <h2>Current Agent</h2>
+    <div class="current-card">
+      <div class="current" id="current"></div>
+      <p class="facts" id="facts"></p>
+      <div class="context-meter" id="context-meter" hidden></div>
+      <div class="context-help-panel" id="context-help-panel" hidden></div>
+      <p class="context-full" id="context-full" hidden></p>
+    </div>
+    <details class="section-drop" id="files-drop">
+      <summary>Touched files<span class="tab-count" id="files-count">0</span></summary>
+      <p class="files" id="files"></p>
+    </details>
+    <details class="section-drop" id="team-drop">
+      <summary>Available team members to work with<span class="tab-count" id="flow-count">0</span></summary>
+      <div id="flow"></div>
+    </details>
+    <details class="section-drop" id="global-drop">
+      <summary>Global rules (every workspace)<span class="tab-count" id="global-count">0</span></summary>
+      <div class="global-actions">
+        <button type="button" class="ctx-action" id="open-cursor-rules" title="Open Cursor's own user rules">Cursor user rules…</button>
+        <button type="button" class="ctx-action" id="toggle-add-global" aria-expanded="false">+ New global rule</button>
+      </div>
+      <form class="add-global" id="add-global" hidden>
+        <input name="name" type="text" required placeholder="rule-name" autocomplete="off" />
+        <input name="description" type="text" placeholder="One-line summary" autocomplete="off" />
+        <button type="submit">Create</button>
+      </form>
+      <ul class="context-list" id="global-list"></ul>
+    </details>
+    <h2>Context Manager</h2>
+    <div class="context-tabs" id="context-tabs">
+      <div class="context-tab-row" id="context-tab-row"></div>
+      <button type="button" class="ctx-new-tab-btn" id="toggle-add-category" aria-expanded="false">+ Category</button>
+      <button type="button" class="ctx-add-btn" id="toggle-add-context" aria-expanded="false">+ Add context</button>
+    </div>
+    <section class="panel add-category-panel" id="add-category-panel" hidden>
+      <form class="add-category" id="add-category">
+        <input name="label" type="text" required placeholder="Category name" autocomplete="off" />
+        <button type="submit">Create category</button>
+      </form>
+    </section>
+    <section class="panel add-context-panel" id="add-context-panel" hidden>
+      <form class="add-context" id="add-context">
+        <label class="field">
+          <span>Type</span>
+          <select name="kind" aria-label="Context type">
+            <option value="rule">Rule</option>
+            <option value="skill">Skill</option>
+            <option value="workflow">Workflow</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Name</span>
+          <input name="name" type="text" required placeholder="context-name" autocomplete="off" />
+        </label>
+        <label class="field span-2">
+          <span>Description</span>
+          <input name="description" type="text" placeholder="One-line summary" autocomplete="off" />
+        </label>
+        <label class="field add-always persona-check" id="always-on-field">
+          <span class="check-wrap">
+            <input name="alwaysOn" type="checkbox" />
+            <span class="check-ui" aria-hidden="true"></span>
+          </span>
+          <span class="check-label">Always apply</span>
+        </label>
+        <fieldset class="persona-picker span-2" id="persona-picker">
+          <legend>Attach to</legend>
+          <div class="persona-checks" id="persona-checks"></div>
+        </fieldset>
+        <button type="submit" class="add-context-submit span-2">Create file</button>
+      </form>
+    </section>
+    <ul class="context-list" id="context-list"></ul>
+    <div class="section-heading">
+      <h2>Activity</h2>
+      <button type="button" class="ctx-action" id="clear-activity">Clear</button>
+    </div>
+    <ul class="log" id="log" aria-live="polite"></ul>
+  </div>
+  {{scripts}}
+</body>
+</html>
