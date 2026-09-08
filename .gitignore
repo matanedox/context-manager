@@ -1,5 +1,6 @@
 *.local
 *.local.md
+node_modules/
 extension/node_modules/
 extension/out/
 extension/dist/

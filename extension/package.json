@@ -2,12 +2,23 @@
   "name": "agent-context",
   "displayName": "Context Manager",
   "description": "Map and manage project context through agent personas",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "local",
   "license": "MIT",
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["Other"],
-  "activationEvents": ["onStartupFinished", "onCommand:contextManager.openBoard"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matanedox/context-manager.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:contextManager.openBoard"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [

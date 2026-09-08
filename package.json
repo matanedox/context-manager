@@ -1,0 +1,13 @@
+{
+	"name": "context-manager-workspace",
+	"private": true,
+	"description": "Formatting for the repo; the extension itself builds from extension/.",
+	"scripts": {
+		"format": "prettier --ignore-path .prettierignore --write extension/src extension/webview extension/test extension/hooks .cursor/hooks",
+		"format:check": "prettier --ignore-path .prettierignore --check extension/src extension/webview extension/test extension/hooks .cursor/hooks"
+	},
+	"devDependencies": {
+		"prettier": "^3.9.6",
+		"prettier-plugin-tailwindcss": "^0.6.14"
+	}
+}
