@@ -4,6 +4,7 @@
  * node test/hooks-install.test.js
  */
 const assert = require("node:assert/strict");
+const { execFileSync } = require("node:child_process");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -14,6 +15,7 @@ const {
   installHooks,
   uninstallHooks,
 } = require("../out/data/hooks-install");
+const { workspaceSlug } = require("../out/data/runtime-dir");
 
 // A build with no bundled scripts installs nothing, so repairHooks reports that instead of
 // writing an empty hooks folder and leaving the board's warning up.
@@ -44,7 +46,7 @@ const ignore = fs.readFileSync(path.join(bare, ".gitignore"), "utf8");
 assert.match(ignore, /\.cursor\/hooks\.json/, "hooks.json is ignored so it never hits git status");
 assert.match(
   ignore,
-  /\.cursor\/hooks\/log-agent-event\.sh/,
+  /\.cursor\/hooks\/log-agent-event\.mjs/,
   "copied scripts are ignored, not the whole hooks folder"
 );
 installHooks(bare, extensionPath);
@@ -63,10 +65,26 @@ assert.deepEqual(
 const wiring = JSON.parse(fs.readFileSync(path.join(bare, ".cursor", "hooks.json"), "utf8"));
 assert.ok(
   wiring.hooks.beforeSubmitPrompt.some((entry) =>
-    entry.command.endsWith("inject-persona-context.sh")
+    entry.command.endsWith("resolve-persona-context.mjs")
   ),
   "every prompt re-injects the persona identity"
 );
+const runtimeHome = fs.mkdtempSync(path.join(os.tmpdir(), "agent-viz-hook-runtime-"));
+execFileSync("node", [path.join(bare, ".cursor", "hooks", "log-agent-event.mjs")], {
+  cwd: bare,
+  env: { ...process.env, CURSOR_AGENT_VIZ_HOME: runtimeHome },
+  input: JSON.stringify({
+    hook_event_name: "afterAgentResponse",
+    conversation_id: "windows-safe-chat",
+    input_tokens: 42,
+  }),
+});
+assert.match(
+  fs.readFileSync(path.join(runtimeHome, workspaceSlug(bare), "events.jsonl"), "utf8"),
+  /"input_tokens":42/,
+  "the Node hook logs usage without bash, jq, or platform-specific commands"
+);
+fs.rmSync(runtimeHome, { recursive: true, force: true });
 fs.rmSync(path.join(bare, ".cursor", "hooks", "update-agent-state.mjs"));
 assert.equal(
   checkHooks(bare).ready,
@@ -122,7 +140,7 @@ assert.match(
 );
 fs.writeFileSync(
   path.join(bare, ".cursor", "hooks.json"),
-  JSON.stringify({ version: 1, hooks: { sessionStart: [{ command: ".cursor/hooks/log-agent-event.sh" }] } })
+  JSON.stringify({ version: 1, hooks: { sessionStart: [{ command: "node .cursor/hooks/log-agent-event.mjs" }] } })
 );
 uninstallHooks(bare);
 assert.equal(

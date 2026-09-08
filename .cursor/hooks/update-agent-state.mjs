@@ -3,6 +3,7 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
+import { fileURLToPath } from "node:url";
 
 /**
  * Mirrors extension/src/data/runtime-dir.ts: session state lives outside the workspace so a repo
@@ -387,7 +388,7 @@ function appendPipedEvent() {
   fs.appendFileSync(EVENTS_PATH, `${line}\n`);
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)) {
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   appendPipedEvent();
   refreshState();
 }

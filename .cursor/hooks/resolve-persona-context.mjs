@@ -2,6 +2,7 @@
 /** One hook process: resolve the scrum persona and deliver unread handoffs as additional_context. */
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   DEFAULT_PERSONA,
   isRoleId,
@@ -218,7 +219,7 @@ export function followupLine(row, conversationId) {
 
 function main() {
   const input = JSON.parse(fs.readFileSync(0, "utf8"));
-  // log-agent-event.sh appends this event and refreshes the state file before this hook runs, so
+  // The log hook appends this event and refreshes the state file before this hook runs, so
   // recomputing it here only re-read the whole log — and could spend a pending role click that
   // belongs to the chat the board is still creating. Anything missing has a fallback below.
   const state = readJson(STATE_FILE, {});
@@ -283,6 +284,6 @@ function main() {
   process.stdout.write(context ? JSON.stringify({ additional_context: context }) : "{}");
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)) {
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   main();
 }

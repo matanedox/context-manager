@@ -3,14 +3,13 @@ import * as fs from "fs";
 import * as path from "path";
 
 const SCRIPTS = [
-  "log-agent-event.sh",
-  "inject-persona-context.sh",
+  "log-agent-event.mjs",
   "update-agent-state.mjs",
   "resolve-persona-context.mjs",
 ];
 
-const IDENTITY = ".cursor/hooks/inject-persona-context.sh";
-const LOG = ".cursor/hooks/log-agent-event.sh";
+const IDENTITY = "node .cursor/hooks/resolve-persona-context.mjs";
+const LOG = "node .cursor/hooks/log-agent-event.mjs";
 
 const WIRING: Record<string, string[]> = {
   sessionStart: [LOG, IDENTITY],
@@ -28,7 +27,11 @@ const WIRING: Record<string, string[]> = {
 };
 
 /** Wiring dropped in a later version; pruned on repair so old installs stop paying for it. */
-const RETIRED = [".cursor/hooks/inject-persona-post-tool.sh"];
+const RETIRED = [
+  ".cursor/hooks/inject-persona-post-tool.sh",
+  ".cursor/hooks/inject-persona-context.sh",
+  ".cursor/hooks/log-agent-event.sh",
+];
 
 const IGNORE_MARKER = "# Context Manager (installed hook copies)";
 const IGNORE_PATTERNS = [".cursor/hooks.json", ...SCRIPTS.map((name) => `.cursor/hooks/${name}`)];
@@ -44,7 +47,7 @@ export function hookSource(extensionPath: string): string | undefined {
     path.join(extensionPath, "hooks"),
     path.join(extensionPath, "..", ".cursor", "hooks"),
   ];
-  return candidates.find((dir) => fs.existsSync(path.join(dir, "inject-persona-context.sh")));
+  return candidates.find((dir) => fs.existsSync(path.join(dir, "resolve-persona-context.mjs")));
 }
 
 /** Check every script and event required for identity, activity, and subagent tracking. */

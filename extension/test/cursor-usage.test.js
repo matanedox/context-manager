@@ -7,6 +7,7 @@ const {
   jwtPayload,
   sessionCookieFromAccessToken,
 } = require("../out/data/cursor-session");
+const { pythonCommands, readToken } = require("../out/data/cursor-account");
 
 function jwtWith(payload) {
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
@@ -19,6 +20,22 @@ assert.equal(accountSub(jwt), "github|user_01ABC", "the query param wants the cl
 assert.equal(sessionCookieFromAccessToken(jwt), `user_01ABC%3A%3A${jwt}`);
 assert.equal(sessionCookieFromAccessToken("not-a-jwt"), null);
 assert.equal(sessionCookieFromAccessToken(jwtWith({})), null);
+assert.deepEqual(
+  pythonCommands("win32").slice(0, 2),
+  [["py", ["-3"]], ["python", []]],
+  "Windows tries its standard Python launchers before the Unix name"
+);
+
+// No state DB is nobody logged in, so the board still offers Connect. A DB no reader can open is
+// the Windows defect instead: it must be reported, never answered with the login page again.
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+assert.deepEqual(readToken(path.join(os.tmpdir(), "agent-context-absent.vscdb")), {});
+const notADb = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "agent-context-db-")), "state.vscdb");
+fs.writeFileSync(notADb, "not a sqlite database");
+assert.equal(readToken(notADb).unreadable, true, "an unreadable state DB is a reported failure");
+fs.rmSync(path.dirname(notADb), { recursive: true, force: true });
 
 // Both shapes exactly as the endpoints answered them on 8 Sep 2026.
 const SUMMARY = {

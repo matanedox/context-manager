@@ -2,25 +2,25 @@
   "version": 1,
   "hooks": {
     "sessionStart": [
-      { "command": ".cursor/hooks/log-agent-event.sh" },
-      { "command": ".cursor/hooks/inject-persona-context.sh" }
+      { "command": "node .cursor/hooks/log-agent-event.mjs" },
+      { "command": "node .cursor/hooks/resolve-persona-context.mjs" }
     ],
-    "sessionEnd": [{ "command": ".cursor/hooks/log-agent-event.sh" }],
+    "sessionEnd": [{ "command": "node .cursor/hooks/log-agent-event.mjs" }],
     "beforeSubmitPrompt": [
-      { "command": ".cursor/hooks/log-agent-event.sh" },
-      { "command": ".cursor/hooks/inject-persona-context.sh" }
+      { "command": "node .cursor/hooks/log-agent-event.mjs" },
+      { "command": "node .cursor/hooks/resolve-persona-context.mjs" }
     ],
-    "stop": [{ "command": ".cursor/hooks/inject-persona-context.sh" }],
+    "stop": [{ "command": "node .cursor/hooks/resolve-persona-context.mjs" }],
     "subagentStart": [
-      { "command": ".cursor/hooks/log-agent-event.sh" },
-      { "command": ".cursor/hooks/inject-persona-context.sh" }
+      { "command": "node .cursor/hooks/log-agent-event.mjs" },
+      { "command": "node .cursor/hooks/resolve-persona-context.mjs" }
     ],
     "subagentStop": [
-      { "command": ".cursor/hooks/log-agent-event.sh" },
-      { "command": ".cursor/hooks/inject-persona-context.sh" }
+      { "command": "node .cursor/hooks/log-agent-event.mjs" },
+      { "command": "node .cursor/hooks/resolve-persona-context.mjs" }
     ],
-    "postToolUseFailure": [{ "command": ".cursor/hooks/log-agent-event.sh" }],
-    "postToolUse": [{ "command": ".cursor/hooks/log-agent-event.sh" }],
-    "afterAgentResponse": [{ "command": ".cursor/hooks/log-agent-event.sh" }]
+    "postToolUseFailure": [{ "command": "node .cursor/hooks/log-agent-event.mjs" }],
+    "postToolUse": [{ "command": "node .cursor/hooks/log-agent-event.mjs" }],
+    "afterAgentResponse": [{ "command": "node .cursor/hooks/log-agent-event.mjs" }]
   }
 }

@@ -50,11 +50,11 @@
   },
   "scripts": {
     "vscode:uninstall": "node ./out/uninstall.js",
-    "vscode:prepublish": "mkdir -p hooks && cp ../.cursor/hooks/log-agent-event.sh ../.cursor/hooks/inject-persona-context.sh ../.cursor/hooks/update-agent-state.mjs ../.cursor/hooks/resolve-persona-context.mjs hooks/ && npm run compile",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p .",
     "watch": "tsc -watch -p .",
     "lint": "eslint src webview",
-    "test": "tsc -p . && node test/layers.test.js && node test/board-state.test.js && node test/view-model.test.js && node test/workspace-context.test.js && node test/io.test.js && node test/auto-continue.test.js && node test/watch.test.js && node test/hooks-install.test.js && node test/cursor-chat.test.js && node test/handoffs.test.js && node test/cursor-usage.test.js && node ../.cursor/hooks/update-agent-state.test.mjs && node ../.cursor/hooks/resolve-persona-context.test.mjs && bash ../.cursor/hooks/inject-persona-context.test.sh && npm run lint"
+    "test": "tsc -p . && node test/layers.test.js && node test/board-state.test.js && node test/view-model.test.js && node test/workspace-context.test.js && node test/io.test.js && node test/auto-continue.test.js && node test/watch.test.js && node test/hooks-install.test.js && node test/cursor-chat.test.js && node test/handoffs.test.js && node test/cursor-usage.test.js && node ../.cursor/hooks/update-agent-state.test.mjs && node ../.cursor/hooks/resolve-persona-context.test.mjs && npm run lint"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
