@@ -6,14 +6,18 @@
  * Painted into a panel rather than a title: a native tooltip truncates this and only
  * reappears after a window reload.
  */
+const TIP_ICON = `<svg class="context-tip-icon" viewBox="0 0 16 16" aria-hidden="true">
+  <path d="M8 1.5a4 4 0 0 0-2.4 7.2v1.6h4.8V8.7A4 4 0 0 0 8 1.5Z" fill="none" stroke="currentColor" stroke-width="1.2"
+    stroke-linejoin="round"/>
+  <path d="M6.4 12.5h3.2M7 14.3h2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`;
 const HELP_PARAGRAPHS = [
-	'<strong>Tokens spent</strong> is every prompt this chat has paid for, added up across its turns: ten turns of a 30k prompt read as 300k. The cached share is how much of that came from cache rather than being charged again.',
-	'One call is <strong>one agent reply</strong>, however many tool calls it made along the way — the reading grows once per reply, when Cursor reports what that turn cost. Tool calls are counted separately, up in the facts. Every reply re-sends the conversation so far, which is why this climbs faster than the chat looks.',
-	'<strong>Context window</strong> is a different number — how full the current turn is, which drops whenever Cursor summarizes. Only Cursor reports it: <button type="button" data-focus-chat>open this chat</button>, then click the context usage indicator in its composer toolbar.',
-	'<strong>Limit</strong> caps the spend above, not the window (examples: <code>80k</code> or <code>5M</code>). A plain number is millions. Blank is no limit.',
-	'<strong>Auto</strong> requires a limit. When it is hit, this chat is asked for a recap, then a new chat opens with the same persona. It carries over files, tool-call count, the reading, and the recap if ready.',
-	'The new chat is briefed and starts on its own; the thread itself is never copied. It keeps the limit but not the checkbox, so one tick is one replacement. Board-started chats only.',
-	'A limit below what a single turn costs puts the replacement over the moment it answers, so set it above the reading a normal turn adds.',
+	'<strong>Tokens spent:</strong> all the tokens this chat session has used, all replies added up. 10 replies at 30k each is 300k. Never goes down.',
+	'<strong>Cached:</strong> the part Cursor reused instead of re-reading, at lower cost.',
+	'<strong>Calls:</strong> agent replies. Tool calls are counted separately, in Facts.',
+	'<strong>Context window:</strong> a different number. How much this chat carries into its <em>next</em> reply. Drops when Cursor summarizes. Only Cursor shows it: <button type="button" data-focus-chat>open this chat</button>, click the context indicator in its toolbar.',
+	'<strong>Limit:</strong> a line for Tokens spent to cross, like <code>80k</code> or <code>5M</code>. Plain number means millions, blank means none. The reply that crosses it lands a little past.',
+	'<strong>Auto:</strong> needs a Limit. At the Limit this chat writes a recap and one fresh chat opens with the same persona, briefed on it. Files, tool count and recap carry over, the conversation does not. Limit carries over, the checkbox does not.',
+	`<span class="context-tip">${TIP_ICON}<span><strong>Tip:</strong> every reply re-reads the whole chat, so long chats cost more per reply. Starting a new chat for a new task keeps it cheap.</span></span>`,
 ];
 /**
  * The reading and the cap that judges it, on one line. Painted rather than assigned so a repaint

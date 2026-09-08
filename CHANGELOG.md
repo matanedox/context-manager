@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+The agent screen's context explanation is shorter: one plain line each for Tokens spent, Cached,
+Calls, the context window, Limit, and Auto, and it closes with a dimmed lightbulb tip that long
+chats cost more per reply.
+
 ## 0.2.1
 
 The agent screen now labels cumulative prompt usage as **Tokens spent**, explains how replies,
