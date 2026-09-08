@@ -1026,15 +1026,10 @@ button.context-meter-copy:focus-visible .context-meter-label {
 .context-help-panel code {
 	font-size: 9px;
 }
-.context-tip {
-	display: flex;
-	align-items: center;
-	gap: 5px;
-}
 .context-tip-icon {
-	flex: none;
 	width: 11px;
 	height: 11px;
+	vertical-align: -1px;
 	opacity: 0.5;
 }
 .context-help-panel button {

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3
+
+The context explanation's tip now leads with a filled info dot that sits on its first line, rather
+than a hairline lightbulb floating between them.
+
 ## 0.2.2
 
 The agent screen's context explanation is shorter: one plain line each for Tokens spent, Cached,

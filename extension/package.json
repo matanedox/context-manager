@@ -2,7 +2,7 @@
   "name": "agent-context",
   "displayName": "Context Manager",
   "description": "Map and manage project context through agent personas",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "publisher": "local",
   "license": "MIT",
   "repository": {

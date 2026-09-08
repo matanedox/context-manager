@@ -6,10 +6,9 @@
  * Painted into a panel rather than a title: a native tooltip truncates this and only
  * reappears after a window reload.
  */
-const TIP_ICON = `<svg class="context-tip-icon" viewBox="0 0 16 16" aria-hidden="true">
-  <path d="M8 1.5a4 4 0 0 0-2.4 7.2v1.6h4.8V8.7A4 4 0 0 0 8 1.5Z" fill="none" stroke="currentColor" stroke-width="1.2"
-    stroke-linejoin="round"/>
-  <path d="M6.4 12.5h3.2M7 14.3h2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`;
+// Filled rather than stroked: at 11px a 1.2px stroke lands under a device pixel and turns to mush.
+const TIP_ICON = `<svg class="context-tip-icon" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor"
+  d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zm0 2.6a1 1 0 1 1 0 2 1 1 0 0 1 0-2zM7 7.4h2v4.6H7z"/></svg>`;
 const HELP_PARAGRAPHS = [
 	'<strong>Tokens spent:</strong> all the tokens this chat session has used, all replies added up. 10 replies at 30k each is 300k. Never goes down.',
 	'<strong>Cached:</strong> the part Cursor reused instead of re-reading, at lower cost.',
@@ -17,7 +16,7 @@ const HELP_PARAGRAPHS = [
 	'<strong>Context window:</strong> a different number. How much this chat carries into its <em>next</em> reply. Drops when Cursor summarizes. Only Cursor shows it: <button type="button" data-focus-chat>open this chat</button>, click the context indicator in its toolbar.',
 	'<strong>Limit:</strong> a line for Tokens spent to cross, like <code>80k</code> or <code>5M</code>. Plain number means millions, blank means none. The reply that crosses it lands a little past.',
 	'<strong>Auto:</strong> needs a Limit. At the Limit this chat writes a recap and one fresh chat opens with the same persona, briefed on it. Files, tool count and recap carry over, the conversation does not. Limit carries over, the checkbox does not.',
-	`<span class="context-tip">${TIP_ICON}<span><strong>Tip:</strong> every reply re-reads the whole chat, so long chats cost more per reply. Starting a new chat for a new task keeps it cheap.</span></span>`,
+	`${TIP_ICON} <strong>Tip:</strong> every reply re-reads the whole chat, so long chats cost more per reply. Starting a new chat for a new task keeps it cheap.`,
 ];
 /**
  * The reading and the cap that judges it, on one line. Painted rather than assigned so a repaint
