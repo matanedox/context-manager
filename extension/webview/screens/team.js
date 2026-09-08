@@ -16,6 +16,13 @@ function submitPersona(form) {
   if (ui.currentPayload) renderTeam(ui.currentPayload);
 }
 
+/** Shares ROBOT_SVG's box and .bot sizing so the tile's icon and label rows match the roster. */
+const ADD_SVG = `<svg class="bot" viewBox="0 0 48 48" aria-hidden="true">
+  <circle cx="24" cy="24" r="15" fill="currentColor" opacity="0.14"/>
+  <circle cx="24" cy="24" r="15" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+  <path d="M24 17.5v13M17.5 24h13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+</svg>`;
+
 function renderRoster(payload) {
   document.getElementById("banner").textContent = payload.banner;
   const figures = payload.roster
@@ -39,7 +46,7 @@ function renderRoster(payload) {
   paint(
     document.getElementById("roster"),
     `${figures}<button class="figure figure-add${addActive}" type="button" data-toggle-add-persona aria-pressed="${ui.showAddPersona}" title="Add a scrum persona">
-    <span class="add-icon" aria-hidden="true">+</span><span class="name">Add persona</span>
+    ${ADD_SVG}<span class="figure-copy"><span class="role">Add persona</span></span>
   </button>`
   );
 }

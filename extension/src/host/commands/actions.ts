@@ -207,7 +207,8 @@ export function addPersona(input: CreatePersonaInput, refresh: () => void): void
 }
 
 export function dropPersona(role: Role, refresh: () => void): void {
-  void vscode.window.showWarningMessage(`Remove ${role} from the team?`, "Remove").then((choice) => {
+  // Modal like every other destructive confirm here: a toast behind the sidebar reads as a dead ×.
+  void vscode.window.showWarningMessage(`Remove ${role} from the team?`, { modal: true }, "Remove").then((choice) => {
     if (choice !== "Remove") return;
     if (!removePersona(workspaceRoot(), role)) {
       void vscode.window.showWarningMessage(
