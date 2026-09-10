@@ -8,7 +8,14 @@ const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { checkHooks, hookSource, hooksInstalled, installHooks, uninstallHooks } = require('../out/data/hooks-install');
+const {
+	checkHooks,
+	hookSource,
+	hooksInstalled,
+	installHooks,
+	resolveNodeCommand,
+	uninstallHooks,
+} = require('../out/data/hooks-install');
 const { workspaceSlug } = require('../out/data/runtime-dir');
 
 // A build with no bundled scripts installs nothing, so repairHooks reports that instead of
@@ -149,5 +156,49 @@ assert.equal(
 );
 fs.rmSync(ownSource, { recursive: true, force: true });
 fs.rmSync(bare, { recursive: true, force: true });
+
+// Cursor runs hooks through the environment it was launched with, and a Start-menu or Dock launch
+// often has no `node` on it at all. The interpreter is resolved at install time so the wiring works
+// there, and a workspace pinned to an absolute path still has to read as installed, not as broken.
+const pinned = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-viz-pinned-'));
+installHooks(pinned, extensionPath);
+const wiredWith = JSON.parse(fs.readFileSync(path.join(pinned, '.cursor', 'hooks.json'), 'utf8'));
+const started = wiredWith.hooks.sessionStart.map((entry) => entry.command);
+assert.ok(
+	started.some((command) => command.endsWith('.cursor/hooks/log-agent-event.mjs')),
+	'the wiring still names the script, whatever interpreter was resolved for it'
+);
+assert.equal(
+	resolveNodeCommand(),
+	'node',
+	'a host that can already run `node` keeps the portable wiring instead of pinning a path'
+);
+const custom = { command: '"C:\\Program Files\\nodejs\\node.exe" .cursor/hooks/log-agent-event.mjs' };
+fs.writeFileSync(
+	path.join(pinned, '.cursor', 'hooks.json'),
+	JSON.stringify({ version: 1, hooks: { ...wiredWith.hooks, sessionEnd: [custom] } })
+);
+assert.equal(
+	checkHooks(pinned).ready,
+	true,
+	'a hook pinned to an absolute node path is installed, not missing: repair must not loop on it'
+);
+uninstallHooks(pinned);
+assert.equal(
+	fs.existsSync(path.join(pinned, '.cursor', 'hooks.json')),
+	false,
+	'and uninstall removes a pinned command too, rather than leaving it behind'
+);
+fs.rmSync(pinned, { recursive: true, force: true });
+
+// `extension/hooks/` is what ships and `.cursor/hooks/` is what this repo runs, and nothing at
+// package time copies one to the other: a fix landing in only one tree ships or tests the old hook.
+for (const name of ['log-agent-event.mjs', 'update-agent-state.mjs', 'resolve-persona-context.mjs']) {
+	assert.equal(
+		fs.readFileSync(path.join(extensionPath, 'hooks', name), 'utf8'),
+		fs.readFileSync(path.join(extensionPath, '..', '.cursor', 'hooks', name), 'utf8'),
+		`extension/hooks/${name} has drifted from .cursor/hooks/${name}: copy the source over before shipping`
+	);
+}
 
 console.log('hooks-install checks passed');

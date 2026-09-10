@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
-import { isDirectRun, pruneSessions, reduceSessions } from './update-agent-state.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { isDirectRun, pruneSessions, reduceSessions, runtimeDir } from './update-agent-state.mjs';
 
 const roleMap = { explore: 'beta', shell: 'epsilon' };
 const event = (type, conversationId, extra = {}) => ({
@@ -142,4 +147,20 @@ assert.equal(keptExtras.autoContinueOnLimit, true, 'or the auto-continue checkbo
 assert.equal(keptExtras.autoContinuedTo, 'next', 'or the rollover once-guard');
 assert.equal(isDirectRun(import.meta.url), true, 'a node argv path still counts as a direct run on this OS');
 assert.equal(isDirectRun('file:///not-this-module.mjs'), false, 'a different module is not a direct run');
+
+// Windows pipes the hook payload through PowerShell, which prefixes a UTF-8 BOM. A parse that
+// chokes on it is swallowed by the hook's own catch, so the board just goes quiet: run the real
+// script end to end rather than trusting the reader in isolation.
+process.env.CURSOR_AGENT_VIZ_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-viz-'));
+const piped = spawnSync(process.execPath, [fileURLToPath(new URL('./log-agent-event.mjs', import.meta.url))], {
+	input: `\uFEFF${JSON.stringify({ hook_event_name: 'sessionStart', conversation_id: 'bom-chat' })}`,
+	env: process.env,
+	encoding: 'utf8',
+});
+assert.equal(piped.status, 0, piped.stderr);
+assert.ok(
+	fs.readFileSync(path.join(runtimeDir(), 'events.jsonl'), 'utf8').includes('"conversation_id":"bom-chat"'),
+	'a BOM-prefixed payload is still logged'
+);
+fs.rmSync(process.env.CURSOR_AGENT_VIZ_HOME, { recursive: true, force: true });
 console.log('session-state checks passed');

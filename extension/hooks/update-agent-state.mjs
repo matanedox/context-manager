@@ -45,6 +45,19 @@ export function isRoleId(value) {
 	return typeof value === 'string' && /^[a-z][a-z0-9-]*$/.test(value);
 }
 
+/**
+ * The one place a hook reads its Cursor payload. Windows pipes it through PowerShell, which
+ * prefixes a UTF-8 BOM that `JSON.parse` rejects at position 0 — every hook here parses, so the
+ * strip belongs with the read rather than at each of the three call sites.
+ */
+export function readStdin() {
+	try {
+		return fs.readFileSync(0, 'utf8').replace(/^\uFEFF/, '');
+	} catch {
+		return '';
+	}
+}
+
 export function readText(file) {
 	try {
 		return fs.readFileSync(file, 'utf8');
@@ -365,12 +378,7 @@ export function refreshState() {
 /** The log hook pipes one trimmed event in, so the shell side needs no copy of the log path. */
 function appendPipedEvent() {
 	if (process.stdin.isTTY) return;
-	let line = '';
-	try {
-		line = fs.readFileSync(0, 'utf8').trim();
-	} catch {
-		return;
-	}
+	const line = readStdin().trim();
 	if (!line) return;
 	fs.mkdirSync(DIR, { recursive: true });
 	fs.appendFileSync(EVENTS_PATH, `${line}\n`);

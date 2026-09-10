@@ -9,6 +9,7 @@ import {
 	mapRole,
 	personaTitle,
 	readJson,
+	readStdin,
 	readText,
 	runtimeDir,
 } from './update-agent-state.mjs';
@@ -215,7 +216,7 @@ export function followupLine(row, conversationId) {
 }
 
 function main() {
-	const input = JSON.parse(fs.readFileSync(0, 'utf8'));
+	const input = JSON.parse(readStdin());
 	// The log hook appends this event and refreshes the state file before this hook runs, so
 	// recomputing it here only re-read the whole log — and could spend a pending role click that
 	// belongs to the chat the board is still creating. Anything missing has a fallback below.

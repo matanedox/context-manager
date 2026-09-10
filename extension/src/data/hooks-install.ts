@@ -1,11 +1,12 @@
 /** Detect and install the hooks that log events and inject the per-chat persona identity. */
+import { spawnSync } from 'node:child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
 const SCRIPTS = ['log-agent-event.mjs', 'update-agent-state.mjs', 'resolve-persona-context.mjs'];
 
-const IDENTITY = 'node .cursor/hooks/resolve-persona-context.mjs';
-const LOG = 'node .cursor/hooks/log-agent-event.mjs';
+const IDENTITY = 'resolve-persona-context.mjs';
+const LOG = 'log-agent-event.mjs';
 
 const WIRING: Record<string, string[]> = {
 	sessionStart: [LOG, IDENTITY],
@@ -21,6 +22,60 @@ const WIRING: Record<string, string[]> = {
 	postToolUseFailure: [LOG],
 	afterAgentResponse: [LOG],
 };
+
+function hookPath(script: string): string {
+	return `.cursor/hooks/${script}`;
+}
+
+/** Ours whatever interpreter it was wired with, so a re-pinned command still reads as installed. */
+function runsScript(command: string | undefined, script: string): boolean {
+	return (command ?? '').replaceAll('\\', '/').endsWith(hookPath(script));
+}
+
+function isOurs(command: string | undefined): boolean {
+	return RETIRED.includes(command ?? '') || SCRIPTS.some((script) => runsScript(command, script));
+}
+
+function runs(binary: string): boolean {
+	try {
+		return spawnSync(binary, ['-v'], { encoding: 'utf8', timeout: 4000, windowsHide: true }).status === 0;
+	} catch {
+		return false;
+	}
+}
+
+/** Where a Node install lands when the launching environment never put it on PATH. */
+function nodeCandidates(): string[] {
+	if (process.platform === 'win32') {
+		return [
+			path.join(process.env.ProgramFiles ?? 'C:\\Program Files', 'nodejs', 'node.exe'),
+			path.join(process.env['ProgramFiles(x86)'] ?? 'C:\\Program Files (x86)', 'nodejs', 'node.exe'),
+			path.join(process.env.LOCALAPPDATA ?? '', 'Programs', 'nodejs', 'node.exe'),
+		];
+	}
+	return ['/opt/homebrew/bin/node', '/usr/local/bin/node', '/usr/bin/node'];
+}
+
+/**
+ * Cursor runs a hook through a shell that inherits the environment Cursor itself was launched with,
+ * and a Start-menu or Dock launch often carries no `node` at all — which leaves every hook dead and
+ * the board with no identity and no activity. Plain `node` is kept whenever it resolves, because a
+ * wiring without an absolute path is one any machine can read; only a host that cannot find it gets
+ * a pinned interpreter.
+ *
+ * ponytail: resolved once, at install time. Ceiling: a Node later moved or upgraded out from under
+ * the pinned path needs one Install / Repair to re-pin. Upgrade path is resolving it per run.
+ */
+export function resolveNodeCommand(): string {
+	if (runs('node')) return 'node';
+	const found = nodeCandidates().find((candidate) => candidate && fs.existsSync(candidate) && runs(candidate));
+	// Quoted because the common Windows home for it is under `Program Files`.
+	return found ? (found.includes(' ') ? `"${found}"` : found) : 'node';
+}
+
+function hookCommand(node: string, script: string): string {
+	return `${node} ${hookPath(script)}`;
+}
 
 /** Wiring dropped in a later version; pruned on repair so old installs stop paying for it. */
 const RETIRED = [
@@ -53,11 +108,11 @@ export function checkHooks(root: string | undefined): HookCheck {
 		const parsed = JSON.parse(fs.readFileSync(path.join(root, '.cursor', 'hooks.json'), 'utf8')) as {
 			hooks?: Record<string, HookEntry[]>;
 		};
-		for (const [event, commands] of Object.entries(WIRING)) {
+		for (const [event, scripts] of Object.entries(WIRING)) {
 			const entries = Array.isArray(parsed.hooks?.[event]) ? parsed.hooks[event] : [];
-			for (const command of commands) {
-				if (!entries.some((entry) => entry?.command === command)) {
-					missing.push(`${event} → ${command}`);
+			for (const script of scripts) {
+				if (!entries.some((entry) => runsScript(entry?.command, script))) {
+					missing.push(`${event} → ${hookPath(script)}`);
 				}
 			}
 		}
@@ -73,7 +128,7 @@ export function hooksInstalled(root: string | undefined): boolean {
 
 type HookEntry = { command?: string };
 
-function mergeConfig(root: string): void {
+function mergeConfig(root: string, node: string): void {
 	const file = path.join(root, '.cursor', 'hooks.json');
 	let config: { version?: number; hooks?: Record<string, HookEntry[]> } = {};
 	try {
@@ -82,14 +137,11 @@ function mergeConfig(root: string): void {
 		/* no config yet, or unreadable: start from the default wiring */
 	}
 	const hooks = config.hooks ?? {};
-	for (const [event, commands] of Object.entries(WIRING)) {
-		const existing = (Array.isArray(hooks[event]) ? hooks[event] : []).filter(
-			(entry) => !RETIRED.includes(entry?.command ?? '')
-		);
-		const missing = commands
-			.filter((command) => !existing.some((entry) => entry?.command === command))
-			.map((command) => ({ command }));
-		hooks[event] = [...existing, ...missing];
+	for (const [event, scripts] of Object.entries(WIRING)) {
+		// Ours are rewritten with the interpreter just resolved, which is what lets a repair replace
+		// a `node` that this host cannot find. A hook the project wired itself is left alone.
+		const theirs = (Array.isArray(hooks[event]) ? hooks[event] : []).filter((entry) => !isOurs(entry?.command));
+		hooks[event] = [...theirs, ...scripts.map((script) => ({ command: hookCommand(node, script) }))];
 	}
 	fs.writeFileSync(file, `${JSON.stringify({ version: config.version ?? 1, hooks }, null, 2)}\n`);
 }
@@ -151,7 +203,7 @@ export function installHooks(root: string | undefined, extensionPath: string): s
 		}
 		return `.cursor/hooks/${name}`;
 	});
-	mergeConfig(root);
+	mergeConfig(root, resolveNodeCommand());
 	return [...ignored, ...written, '.cursor/hooks.json'];
 }
 
@@ -221,10 +273,9 @@ function pruneConfig(root: string): string[] {
 	} catch {
 		return [];
 	}
-	const ours = new Set([...Object.values(WIRING).flat(), ...RETIRED]);
 	const hooks: Record<string, HookEntry[]> = {};
 	for (const [event, entries] of Object.entries(config.hooks ?? {})) {
-		const kept = (Array.isArray(entries) ? entries : []).filter((entry) => !ours.has(entry?.command ?? ''));
+		const kept = (Array.isArray(entries) ? entries : []).filter((entry) => !isOurs(entry?.command));
 		if (kept.length) hooks[event] = kept;
 	}
 	if (!Object.keys(hooks).length) {

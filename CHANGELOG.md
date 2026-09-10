@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.2.6
+
+Hooks no longer depend on how Cursor was launched.
+
+They are wired as `node .cursor/hooks/…`, and Cursor runs them through a shell holding the
+environment Cursor itself started with. Launched from the Windows Start menu or the macOS Dock,
+that environment routinely has no `node` on it — Explorer and Finder hand over a copy of the
+environment made before Node was ever installed. Every hook then dies without a word: no event log,
+no persona identity, and a board that says Cursor did not open a chat it did open.
+
+Install now resolves the interpreter and writes it into the wiring. Plain `node` is kept whenever it
+resolves, so a normal machine gets the same portable `hooks.json` as before; only a host that cannot
+find it on PATH has an absolute path pinned in, quoted for `Program Files`. A workspace wired either
+way reads as installed, so repair does not loop on it, and uninstall removes both forms.
+
+Hook payloads also survive a BOM: Windows pipes them through PowerShell, which prefixes one, and
+`JSON.parse` rejects it at position 0 — silently, inside the hook's own catch. The three hooks read
+stdin through one helper that strips it.
+
+**Upgrading:** run Install / Repair once so the wiring picks up an interpreter this machine can
+actually run.
+
 ## 0.2.5
 
 Clicking a persona warned that Cursor did not open a chat, and cleared the starting session.

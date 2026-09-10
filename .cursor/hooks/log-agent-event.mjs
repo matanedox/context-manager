@@ -2,7 +2,7 @@
 /** Cross-platform hook entrypoint: trim one Cursor event, append it, then refresh board state. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { refreshState, runtimeDir } from './update-agent-state.mjs';
+import { readStdin, refreshState, runtimeDir } from './update-agent-state.mjs';
 
 const KEEP = [
 	'conversation_id',
@@ -36,7 +36,7 @@ function compact(input) {
 
 let input;
 try {
-	input = JSON.parse(fs.readFileSync(0, 'utf8'));
+	input = JSON.parse(readStdin());
 } catch {
 	process.exit(0);
 }
