@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.2.4
+
+The rest of Windows. 0.2.0 moved the hooks to Node, but three things still assumed a Unix box.
+
+**Board chats answered as the bare model again.** Both hook modules decided whether they were the
+process entrypoint by string-comparing a resolved `argv[1]` against `import.meta.url`'s path — a
+comparison Windows loses on drive-letter case and on the relative path `hooks.json` passes. The
+check compares file URLs now, case-insensitively on Windows, so a hook invoked as
+`node .cursor/hooks/resolve-persona-context.mjs` actually runs.
+
+**Installing hooks threw on the copy.** `chmod` has no meaning on Windows and its failure aborted
+the install midway; the execute bit is best-effort now, since the wiring runs the scripts through
+`node` either way.
+
+**Account usage still fell back to a broken query.** On a host old enough to miss `node:sqlite`,
+the Python reader built `file:C:\...?mode=ro`, which is not a URI, so the fallback could never read
+the session it was there to read.
+
+Pressing F5 also works: the preLaunchTask ran a bash script that sourced nvm, so the dev host never
+compiled on Windows. Windows runs a Node script instead.
+
+**Upgrading:** the hook scripts changed, so a workspace that installed the old copies needs one
+Install / Repair to refresh them.
+
 ## 0.2.3
 
 The context explanation's tip now leads with a filled info dot that sits on its first line, rather

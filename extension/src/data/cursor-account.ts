@@ -66,8 +66,9 @@ export function readToken(dbPath = cursorStateDbPath()): TokenRead {
 	// Exit code, not empty output, separates "read it, nobody is logged in" from "could not read it".
 	const script = [
 		'import sqlite3, sys',
-		'path = sys.argv[1]',
-		"for uri in (f'file:{path}?mode=ro', f'file:{path}?mode=ro&immutable=1'):",
+		'path = sys.argv[1].replace(chr(92), "/")',
+		"base = 'file:///' + path.lstrip('/')",
+		"for uri in (base + '?mode=ro', base + '?mode=ro&immutable=1'):",
 		'    try:',
 		'        con = sqlite3.connect(uri, uri=True)',
 		`        row = con.execute('SELECT value FROM ItemTable WHERE key = ?', ('${TOKEN_KEY}',)).fetchone()`,

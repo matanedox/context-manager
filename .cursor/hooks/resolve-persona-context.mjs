@@ -2,9 +2,9 @@
 /** One hook process: resolve the scrum persona and deliver unread handoffs as additional_context. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import {
 	DEFAULT_PERSONA,
+	isDirectRun,
 	isRoleId,
 	mapRole,
 	personaTitle,
@@ -278,6 +278,6 @@ function main() {
 	process.stdout.write(context ? JSON.stringify({ additional_context: context }) : '{}');
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (isDirectRun(import.meta.url)) {
 	main();
 }

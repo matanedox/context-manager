@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
-import { pruneSessions, reduceSessions } from './update-agent-state.mjs';
+import { isDirectRun, pruneSessions, reduceSessions } from './update-agent-state.mjs';
 
 const roleMap = { explore: 'beta', shell: 'epsilon' };
 const event = (type, conversationId, extra = {}) => ({
@@ -140,4 +140,6 @@ assert.equal(keptExtras.instanceIndex, 2, "a recompute must not drop the board's
 assert.equal(keptExtras.contextLimitTokens, 80000, 'or the per-session context cap');
 assert.equal(keptExtras.autoContinueOnLimit, true, 'or the auto-continue checkbox');
 assert.equal(keptExtras.autoContinuedTo, 'next', 'or the rollover once-guard');
+assert.equal(isDirectRun(import.meta.url), true, 'a node argv path still counts as a direct run on this OS');
+assert.equal(isDirectRun('file:///not-this-module.mjs'), false, 'a different module is not a direct run');
 console.log('session-state checks passed');

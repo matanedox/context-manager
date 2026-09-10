@@ -259,6 +259,22 @@ for (const hook_event_name of ['beforeSubmitPrompt', 'stop']) {
 		`${hook_event_name} adds no scrum context to a chat the board never started`
 	);
 }
+const viaRelative = JSON.parse(
+	execFileSync('node', [path.relative(cwd, script).split(path.sep).join('/')], {
+		cwd,
+		input: JSON.stringify({
+			hook_event_name: 'beforeSubmitPrompt',
+			conversation_id: 'named-chat',
+			prompt: 'Who are you?',
+		}),
+		encoding: 'utf8',
+	})
+);
+assert.match(
+	viaRelative.additional_context,
+	/Your name is Wendy\./,
+	'hooks.json relative paths still inject identity (Windows argv vs import.meta.url)'
+);
 fs.rmSync(cwd, { recursive: true, force: true });
 
 console.log('resolve-persona-context checks passed');

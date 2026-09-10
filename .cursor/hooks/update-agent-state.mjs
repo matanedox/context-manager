@@ -3,7 +3,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { fileURLToPath } from 'node:url';
+import { pathToFileURL } from 'node:url';
 
 /**
  * Mirrors extension/src/data/runtime-dir.ts: session state lives outside the workspace so a repo
@@ -376,7 +376,19 @@ function appendPipedEvent() {
 	fs.appendFileSync(EVENTS_PATH, `${line}\n`);
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+/** argv and import.meta.url disagree on Windows drive-letter case; URL compare is the portable check. */
+export function isDirectRun(metaUrl) {
+	const entry = process.argv[1];
+	if (!entry) return false;
+	try {
+		const href = pathToFileURL(path.resolve(entry)).href;
+		return process.platform === 'win32' ? href.toLowerCase() === metaUrl.toLowerCase() : href === metaUrl;
+	} catch {
+		return false;
+	}
+}
+
+if (isDirectRun(import.meta.url)) {
 	appendPipedEvent();
 	refreshState();
 }

@@ -142,8 +142,13 @@ export function installHooks(root: string | undefined, extensionPath: string): s
 	const ignored = path.resolve(source) === path.resolve(target) ? [] : ensureHookGitignore(root);
 	fs.mkdirSync(target, { recursive: true });
 	const written = SCRIPTS.filter((name) => fs.existsSync(path.join(source, name))).map((name) => {
-		fs.copyFileSync(path.join(source, name), path.join(target, name));
-		fs.chmodSync(path.join(target, name), 0o755);
+		const dest = path.join(target, name);
+		fs.copyFileSync(path.join(source, name), dest);
+		try {
+			fs.chmodSync(dest, 0o755);
+		} catch {
+			/* Windows has no execute bit; hooks run as `node …mjs` */
+		}
 		return `.cursor/hooks/${name}`;
 	});
 	mergeConfig(root);

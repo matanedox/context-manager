@@ -5,6 +5,10 @@
       "label": "compile-extension",
       "type": "shell",
       "command": "${workspaceFolder}/.vscode/compile-extension.sh",
+      "windows": {
+        "command": "node",
+        "args": ["${workspaceFolder}/.vscode/compile-extension.cjs"]
+      },
       "problemMatcher": ["$tsc"],
       "group": {
         "kind": "build",
