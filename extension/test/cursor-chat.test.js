@@ -83,6 +83,7 @@ const {
 const { reapClosedSessions, resetClosingForTests } = require('../out/host/commands/close');
 const { waitForCreatedChat } = require('../out/host/session-ready');
 const { leftoverTabs, startRoleSession } = require('../out/host/commands/session-start');
+const { hooksInstalled, installHooks } = require('../out/data/hooks-install');
 const { InlineLoading } = require('../out/host/inline-loading');
 
 const attempted = () => calls.filter(([command]) => command !== LIST);
@@ -470,6 +471,40 @@ async function main() {
 		'the neighbour is still told, it just reads the note on its own next turn'
 	);
 	fs.rmSync(beside, { recursive: true, force: true });
+
+	// Hooks wired on disk are not hooks that run: with no `node` on Cursor's PATH every one of them
+	// dies silently. Creating the chat off-screen for them then loses it for good, so a workspace
+	// whose log is still empty gets a chat it can see.
+	const dead = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-viz-dead-hooks-'));
+	fs.mkdirSync(path.join(dead, '.cursor', 'personas'), { recursive: true });
+	fs.writeFileSync(
+		path.join(dead, '.cursor', 'personas', 'alpha.md'),
+		'---\nid: alpha\ntitle: Alpha\ndescription: Owns alpha.\n---\n\nOwns alpha.\n'
+	);
+	installHooks(dead, path.resolve(__dirname, '..'));
+	assert.equal(hooksInstalled(dead), true, 'the workspace is fully wired, so only the empty log says they are dead');
+	scenario(['composer.createNew', 'composer.openComposer', 'composer.focusComposer'], ['old-chat']);
+	created = 'new-chat';
+	startRoleSession(
+		{
+			root: dead,
+			extensionPath: path.resolve(__dirname, '..'),
+			loading: new InlineLoading(() => {}),
+			refresh: () => {},
+			pin: () => {},
+			release: () => {},
+			showAgentPage: () => {},
+		},
+		'alpha'
+	);
+	await runChatTask(async () => {});
+	assert.deepEqual(
+		attempted()[0],
+		['composer.createNew', { openInNewTab: true }],
+		'a chat is never hidden behind hooks that have never fired, or nothing can reveal it again'
+	);
+	assert.equal(focused, 'new-chat', 'and the session still starts: the persona chat is on screen');
+	fs.rmSync(dead, { recursive: true, force: true });
 
 	console.log('cursor-chat checks passed');
 }

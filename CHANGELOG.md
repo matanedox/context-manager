@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.5
+
+Clicking a persona warned that Cursor did not open a chat, and cleared the starting session.
+
+A chat is created off-screen while its persona identity is bound, and revealed once that is done —
+but only the hooks can name a chat nobody can see. The board decided they were up to it by looking
+at `.cursor/hooks.json` and the scripts beside it, which says the hooks are wired, not that they
+run: `node .cursor/hooks/…` is dead on a host with no `node` on the PATH Cursor was started with,
+which is most Windows boxes. Every event was lost, the hidden chat was never identified, and the
+start gave up on a chat that had in fact been created.
+
+Hooks now have to have actually fired in the workspace before a chat is hidden behind them; until
+the log has a line in it, the chat is created in view. The warning also names the cause when the
+hooks are wired but have never run once, instead of blaming Cursor for a chat it did open.
+
 ## 0.2.4
 
 The rest of Windows. 0.2.0 moved the hooks to Node, but three things still assumed a Unix box.

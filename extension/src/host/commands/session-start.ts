@@ -76,7 +76,12 @@ export function startRoleSession(host: SessionHost, role: Role, continueNote?: s
 			host.refresh();
 
 			// The walkthrough the board claimed on its first entry, if this is that chat.
-			const hooksReady = checkHooks(root).ready;
+			// Wiring on disk is not proof the hook runner can execute it: `node .cursor/hooks/…` is
+			// dead on a host that has no `node` on the PATH Cursor was started with, and a chat created
+			// off-screen for hooks that never fire is one nothing can find again. An empty log means
+			// nothing has ever fired here, so the chat is created in view instead of hidden.
+			const hooksWired = checkHooks(root).ready;
+			const hooksLive = hooksWired && !loaded.usingDemo;
 			const intro = takeIntroNote(root);
 
 			// Create off-screen while hooks bind the persona, then reveal the chat. Not the walkthrough:
@@ -88,13 +93,15 @@ export function startRoleSession(host: SessionHost, role: Role, continueNote?: s
 			// user to send, but the resume below delivers its brief on its own, which left that line
 			// sitting in the composer after the chat had already answered it.
 			const prefill = intro ? HELLO_PROMPT : undefined;
-			await newChat(prefill ? false : hooksReady, prefill, Boolean(intro));
+			await newChat(prefill ? false : hooksLive, prefill, Boolean(intro));
 			const conversationId = await waitForCreatedChat(root, extensionPath, before, afterEventCount, 5000);
 			if (!conversationId) {
 				clearPendingRole(root);
 				if (rolloverFrom) unclaimAutoContinue(root, rolloverFrom);
 				void vscode.window.showWarningMessage(
-					`Cursor did not open a new chat for ${role}. The board cleared the starting session.`
+					hooksWired && !hooksLive
+						? `Cursor did not open a new chat for ${role}. The hooks are installed but none has ever run in this workspace: check that \`node\` is on the PATH Cursor was started with, then reload the window.`
+						: `Cursor did not open a new chat for ${role}. The board cleared the starting session.`
 				);
 				return;
 			}
