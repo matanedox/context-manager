@@ -39,6 +39,8 @@ assert.equal(summaryB.inputTokens, 1000);
 assert.equal(summaryB.cachedShare, 0.75, 'cached share comes from cache_read/input');
 assert.equal(summaryB.toolCalls, 1);
 assert.deepEqual(summaryB.files, ['two.ts'], 'file names are extracted from tool_input');
+// The chips label with `files` and open with `filePaths`, so a drift between them opens the wrong tab.
+assert.deepEqual(summaryB.filePaths, ['b/two.ts'], 'the whole path is kept for opening the file');
 assert.equal(summaryB.endReason, 'completed', 'final_status wins over reason when set');
 
 const summaryEmpty = contextSummary([]);
@@ -136,6 +138,36 @@ const failed = boardState(
 	false
 );
 assert.equal(failed.sessions[0].status, 'failed');
+
+// ...and it outlives the turn that ended on it, or the one state worth reading is wiped a second
+// after it appears.
+const failedTurn = boardState(
+	[
+		event('sessionStart', 'boom', 0),
+		event('beforeSubmitPrompt', 'boom', 1),
+		event('postToolUseFailure', 'boom', 2, { tool_name: 'Shell' }),
+		event('afterAgentResponse', 'boom', 3),
+	],
+	roleMap,
+	{},
+	false
+);
+assert.equal(failedTurn.sessions[0].status, 'failed', 'a turn that ended on a failed tool still reads as failed');
+
+// A failure the agent retried past is not the chat's state: the next successful tool restores the
+// working pulse the failure had taken over.
+const recovered = boardState(
+	[
+		event('sessionStart', 'boom', 0),
+		event('beforeSubmitPrompt', 'boom', 1),
+		event('postToolUseFailure', 'boom', 2, { tool_name: 'Read' }),
+		event('postToolUse', 'boom', 3, { tool_name: 'Read' }),
+	],
+	roleMap,
+	{},
+	false
+);
+assert.equal(recovered.sessions[0].status, 'working', 'a recovered failure hands the row back to working');
 
 // human-readable activity copy
 assert.equal(activityDescription(event('sessionStart', 'conv-a', 0), 'beta', roleMap), 'New Beta session started');

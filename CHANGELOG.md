@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.8
+
+Touched files open, and "tool error" means what it says.
+
+Every file in a chat's Touched files list is now a button: click one and it opens in the editor. The
+list only ever kept the file's name, so it now carries the whole path too — the name is still what
+the chip shows, with the full path on hover. Two files that share a name in different folders stay
+two chips rather than collapsing into one, since one of them opening the other's file is worse than
+a repeated label. A path that points outside the workspace, or at a file that has since been
+deleted, opens nothing.
+
+A chat's session status also read the wrong way round. One failed tool call painted the row "tool
+error" and took over the working pulse for the rest of the turn, even when the agent retried and
+carried on — while a turn that genuinely died on a failed tool was reported as idle a second later,
+because the end of a turn cleared the state unconditionally. A successful tool call now hands the
+row back to working, and a failure the agent never got past survives to the end of the turn. "Tool
+error" now means one thing: the last tool this chat ran failed and it did not recover.
+
 ## 0.2.7
 
 Install / Repair could leave the board unable to save anything, on Windows.

@@ -190,7 +190,14 @@ function renderAgent(payload) {
 	paint(
 		document.getElementById('files'),
 		files.length
-			? files.map((file) => `<code>${escapeHtml(file)}</code>`).join(' ')
+			? files
+					.map(
+						(file) =>
+							`<button type="button" class="file-chip" data-touched-path="${escapeHtml(
+								file.path
+							)}" title="${escapeHtml(file.path)}"><code>${escapeHtml(file.name)}</code></button>`
+					)
+					.join(' ')
 			: '<span class="empty">No files touched in this session yet.</span>'
 	);
 	renderFlow(payload);

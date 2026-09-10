@@ -83,6 +83,34 @@ const failed = reduceSessions(
 ).sessions[0];
 assert.equal(failed.status, 'failed', 'a failed tool call is a distinct session state');
 
+// A retried failure is not the chat's state, but one the turn ended on is: the row keeps the working
+// pulse through a recovery and only reports a failure the agent never got past.
+const recovered = reduceSessions(
+	[
+		event('sessionStart', 'boom'),
+		event('beforeSubmitPrompt', 'boom', { second: 1 }),
+		event('postToolUseFailure', 'boom', { second: 2, tool_name: 'Read' }),
+		event('postToolUse', 'boom', { second: 3, tool_name: 'Read' }),
+	],
+	roleMap,
+	new Map(),
+	null
+).sessions[0];
+assert.equal(recovered.status, 'working', 'a successful tool clears a failure the agent recovered from');
+
+const failedTurn = reduceSessions(
+	[
+		event('sessionStart', 'boom'),
+		event('beforeSubmitPrompt', 'boom', { second: 1 }),
+		event('postToolUseFailure', 'boom', { second: 2, tool_name: 'Shell' }),
+		event('afterAgentResponse', 'boom', { second: 3 }),
+	],
+	roleMap,
+	new Map(),
+	null
+).sessions[0];
+assert.equal(failedTurn.status, 'failed', 'a turn that ended on a failed tool does not report idle');
+
 const waiting = reduceSessions([event('postToolUse', 'unrelated', { tool_name: 'Read' })], roleMap, new Map(), {
 	role: 'epsilon',
 	afterEventCount: 0,

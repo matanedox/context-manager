@@ -27,7 +27,8 @@ export type AgentScreen = {
 	autoContinueOnLimit?: boolean;
 	canSetLimit: boolean;
 	selectedConversationId?: string;
-	files: string[];
+	/** `path` is what the chip opens; `name` is all there is room to show. */
+	files: Array<{ name: string; path: string }>;
 	log: Array<{ ts: string; text: string; hot: boolean }>;
 	selectedRole: Role;
 	roleTitle: string;
@@ -111,7 +112,7 @@ export function buildAgent(snapshot: BoardSnapshot, selection: Selection): Agent
 		autoContinueOnLimit: Boolean(selected?.autoContinueOnLimit),
 		canSetLimit: Boolean(selected) && !snapshot.usingDemo,
 		selectedConversationId: selected?.conversationId,
-		files: summary.files,
+		files: summary.filePaths.map((path, index) => ({ name: summary.files[index], path })),
 		log: activityLog(events, selected?.role ?? GUIDE_PERSONA.id, roleMap, busyRoles, activityNames),
 		selectedRole: role,
 		roleTitle: personaTitle(context, role),

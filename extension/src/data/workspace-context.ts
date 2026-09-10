@@ -73,6 +73,19 @@ export function isWorkspaceContextPath(relPath: string): boolean {
 	);
 }
 
+/**
+ * Resolve a path a tool reported, for opening it. The log is written by hooks and holds whatever
+ * argument the tool was given — absolute or relative, either slash — so this is a trust boundary:
+ * anything that lands outside the workspace, or does not exist, resolves to nothing.
+ */
+export function workspaceFilePath(root: string | undefined, filePath: string): string | null {
+	if (!root || !filePath) return null;
+	const abs = path.resolve(root, filePath);
+	const rel = path.relative(root, abs);
+	if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) return null;
+	return fs.existsSync(abs) && fs.statSync(abs).isFile() ? abs : null;
+}
+
 /** Skill folders keep their entry point plus supporting docs; label by folder for `SKILL.md`. */
 function skillLabel(root: string, file: string): string {
 	const base = path.basename(file);

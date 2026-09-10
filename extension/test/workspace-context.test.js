@@ -19,6 +19,7 @@ const {
 	removePersona,
 	restoreGuide,
 	workspaceContext,
+	workspaceFilePath,
 } = require('../out/data/workspace-context');
 const {
 	createContextCategory,
@@ -37,6 +38,24 @@ assert.equal(isWorkspaceContextPath('.cursor/rules/a.mdc'), true);
 assert.equal(isWorkspaceContextPath('.cursor/rules/../secrets.txt'), false);
 assert.equal(isWorkspaceContextPath('.cursor/personas/beta.md'), true);
 assert.equal(isWorkspaceContextPath('vendor/rules/a.mdc'), false);
+
+// A touched-files chip opens whatever the log recorded, so the resolver is a trust boundary: the
+// hook writes the argument the tool was handed, in whichever shape and slash the caller used.
+const touchedRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-viz-touched-'));
+fs.mkdirSync(path.join(touchedRoot, 'src'));
+const touchedAbs = path.join(touchedRoot, 'src', 'app.ts');
+fs.writeFileSync(touchedAbs, 'export const a = 1;\n');
+assert.equal(workspaceFilePath(touchedRoot, 'src/app.ts'), touchedAbs, 'a relative path resolves against the root');
+assert.equal(workspaceFilePath(touchedRoot, touchedAbs), touchedAbs, 'so does the absolute path tools usually log');
+assert.equal(
+	workspaceFilePath(touchedRoot, '../outside.ts'),
+	null,
+	'a path climbing out of the workspace opens nothing'
+);
+assert.equal(workspaceFilePath(touchedRoot, 'src/gone.ts'), null, 'a file the chat deleted since opens nothing');
+assert.equal(workspaceFilePath(touchedRoot, 'src'), null, 'a directory is not a tab');
+assert.equal(workspaceFilePath(undefined, 'src/app.ts'), null, 'no workspace, nothing to open');
+fs.rmSync(touchedRoot, { recursive: true, force: true });
 
 const workflowRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-viz-workflow-'));
 assert.equal(

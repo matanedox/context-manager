@@ -1210,6 +1210,22 @@ button.context-meter-copy:focus-visible .context-meter-label {
 	border-radius: 3px;
 	background: var(--vscode-editor-inactiveSelectionBackground, #2d2d2d);
 }
+.file-chip {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+.file-chip:hover code {
+	background: var(--vscode-list-hoverBackground, #37373d);
+	text-decoration: underline;
+}
+.file-chip:focus-visible {
+	outline: 1px solid var(--vscode-focusBorder, #0078d4);
+	outline-offset: 1px;
+}
 .context-tabs {
 	display: flex;
 	flex-direction: column;

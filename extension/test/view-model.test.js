@@ -67,7 +67,11 @@ assert.deepEqual(
 	['role', 'roleLabel', 'name', 'removable', 'dimmed'],
 	'roster cards carry no live state, so hook refreshes cannot make them flash'
 );
-assert.equal(payload.roster.at(-1).name, undefined, 'the Extension Assistant has a role title, not a baked-in first name');
+assert.equal(
+	payload.roster.at(-1).name,
+	undefined,
+	'the Extension Assistant has a role title, not a baked-in first name'
+);
 assert.equal(personaName('project-manager'), undefined, 'the project manager has no default first name');
 assert.equal(personaName('project-manager', 'Wendy'), 'Wendy', 'and the persona source is how a project names it');
 assert.equal(personaName('beta'), undefined, 'other personas stay unnamed until their source names them');

@@ -28,7 +28,12 @@ export function deriveDemoSessions(events: HookEvent[], roleMap: Record<string, 
 		const kind = eventType(event);
 		if (kind === 'beforeSubmitPrompt') session.status = 'working';
 		if (kind === 'postToolUseFailure') session.status = 'failed';
-		if (kind === 'afterAgentResponse') session.status = 'idle';
+		// A failure the agent recovered from is not the chat's state: the next tool that succeeds puts
+		// the row back to working, and only an unrecovered one survives the turn. Without both halves
+		// a retried Read hid the working pulse for the rest of the turn, then the turn end wiped the
+		// failure that actually stopped the agent.
+		if (kind === 'postToolUse' && session.status === 'failed') session.status = 'working';
+		if (kind === 'afterAgentResponse' && session.status !== 'failed') session.status = 'idle';
 		if (kind === 'sessionEnd') session.status = 'closed';
 		const type = subagentType(event);
 		const role = mapRole(type, roleMap);

@@ -266,8 +266,12 @@ export function reduceSessions(events, roleMap, assignments, pending, known = ne
 			session.status = 'working';
 		} else if (kind === 'postToolUseFailure') {
 			session.status = 'failed';
+		} else if (kind === 'postToolUse') {
+			// A failure the agent recovered from is not the chat's state; the next successful tool puts
+			// the row back to working, so only an unrecovered failure reaches the end of the turn.
+			if (session.status === 'failed') session.status = 'working';
 		} else if (kind === 'afterAgentResponse') {
-			session.status = 'idle';
+			if (session.status !== 'failed') session.status = 'idle';
 			session.highlighted = false;
 		} else if (kind === 'sessionEnd') {
 			session.status = 'closed';

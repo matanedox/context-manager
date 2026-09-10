@@ -19,6 +19,7 @@ import {
 	isWorkspaceContextPath,
 	removePersona,
 	workspaceContext,
+	workspaceFilePath,
 	type CreateContextInput,
 	type CreatePersonaInput,
 } from '../../data/workspace-context';
@@ -31,6 +32,7 @@ export function contextHandlers(
 ): Pick<
 	BoardHandlers,
 	| 'onFile'
+	| 'onOpenTouchedFile'
 	| 'onOpenContext'
 	| 'onAttachContext'
 	| 'onDeleteContext'
@@ -45,6 +47,7 @@ export function contextHandlers(
 > {
 	return {
 		onFile: (relPath, editable) => openContextFile(relPath, editable),
+		onOpenTouchedFile: (filePath) => openTouchedFile(filePath),
 		onOpenContext: (itemId) => openContextItem(itemId),
 		onAttachContext: (itemId) => attachContextItem(conversationId(), itemId),
 		onDeleteContext: (itemId) => deleteContextItem(itemId, refresh),
@@ -70,6 +73,16 @@ export function openContextFile(relPath: string, editable = false): void {
 	const uri = vscode.Uri.joinPath(root, relPath);
 	if (!fs.existsSync(uri.fsPath)) return;
 	void vscode.window.showTextDocument(uri, { preview: !editable });
+}
+
+/**
+ * A touched-files chip. `openContextFile` is deliberately narrow — the webview cannot use it to
+ * reach past the context roots — so a chat's own files get their own guard rather than widening it.
+ */
+export function openTouchedFile(filePath: string): void {
+	const abs = workspaceFilePath(workspaceRoot(), filePath);
+	if (!abs) return;
+	void vscode.window.showTextDocument(vscode.Uri.file(abs), { preview: true });
 }
 
 function knownContextItem(itemId: string) {

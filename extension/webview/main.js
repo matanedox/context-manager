@@ -178,6 +178,11 @@ document.body.addEventListener('click', (event) => {
 		vscode.postMessage({ type: 'openFile', path: open.dataset.openPath });
 		return;
 	}
+	const touched = event.target.closest('[data-touched-path]');
+	if (touched) {
+		vscode.postMessage({ type: 'openTouchedFile', path: touched.dataset.touchedPath });
+		return;
+	}
 	if (event.target.closest('[data-focus-chat]')) {
 		vscode.postMessage({ type: 'focusChat' });
 		return;

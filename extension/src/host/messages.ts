@@ -19,6 +19,7 @@ export type BoardHandlers = {
 		text: string;
 	}) => void;
 	onFile: (relPath: string, editable?: boolean) => void;
+	onOpenTouchedFile: (filePath: string) => void;
 	onOpenContext: (itemId: string) => void;
 	onAttachContext: (itemId: string) => void;
 	onDeleteContext: (itemId: string) => void;
@@ -90,6 +91,10 @@ export function bindMessages(webview: vscode.Webview, handlers: BoardHandlers): 
 		}
 		if (msg.type === 'openFile') {
 			if (msg.path) handlers.onFile(msg.path, Boolean(msg.editable));
+			return;
+		}
+		if (msg.type === 'openTouchedFile') {
+			if (msg.path) handlers.onOpenTouchedFile(msg.path);
 			return;
 		}
 		if (msg.type === 'openContext') {

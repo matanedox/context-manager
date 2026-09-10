@@ -20,14 +20,24 @@ export function relativeTime(ts: string | undefined, now: number): string {
 }
 
 /** Pull the file path out of a tool call without assuming any single tool's schema. */
-export function touchedFile(event: HookEvent): string | undefined {
+export function touchedFilePath(event: HookEvent): string | undefined {
 	const input = event.raw?.tool_input;
 	if (!input) return undefined;
 	for (const key of ['path', 'file_path', 'target_file', 'notebook_path']) {
 		const value = input[key];
-		if (typeof value === 'string' && value) return value.split('/').pop();
+		if (typeof value === 'string' && value) return value.replaceAll('\\', '/');
 	}
 	return undefined;
+}
+
+/** The label for a touched path: the log and the brief have no room for the whole thing. */
+export function fileLabel(filePath: string): string {
+	return filePath.split('/').pop() ?? filePath;
+}
+
+export function touchedFile(event: HookEvent): string | undefined {
+	const filePath = touchedFilePath(event);
+	return filePath === undefined ? undefined : fileLabel(filePath);
 }
 
 export type ContextSummary = {
@@ -38,6 +48,8 @@ export type ContextSummary = {
 	outputTokens?: number;
 	toolCalls: number;
 	files: string[];
+	/** Same entries as `files`, in the same order, but whole — `files` is only their labels. */
+	filePaths: string[];
 	endReason?: string;
 };
 
@@ -67,7 +79,9 @@ export function contextMeter(summary: ContextSummary, limitTokens?: number): Con
 }
 
 export function contextSummary(events: HookEvent[]): ContextSummary {
-	const summary: ContextSummary = { toolCalls: 0, files: [] };
+	const summary: ContextSummary = { toolCalls: 0, files: [], filePaths: [] };
+	// Keyed on the whole path, so two same-named files in different folders stay two entries: the
+	// chips open them, and one of them opening the other's tab is worse than a repeated label.
 	const files = new Set<string>();
 	let cacheRead = 0;
 	for (const event of events) {
@@ -77,7 +91,7 @@ export function contextSummary(events: HookEvent[]): ContextSummary {
 		if (raw.composer_mode) summary.composerMode = raw.composer_mode;
 		if (kind === 'postToolUse' || kind === 'preToolUse') {
 			summary.toolCalls += 1;
-			const file = touchedFile(event);
+			const file = touchedFilePath(event);
 			if (file) files.add(file);
 		}
 		// Summed, not last-wins: the reading is what this chat has spent, so a chat that answered ten
@@ -94,7 +108,8 @@ export function contextSummary(events: HookEvent[]): ContextSummary {
 			summary.endReason = raw.final_status && raw.final_status !== 'none' ? raw.final_status : raw.reason;
 		}
 	}
-	summary.files = [...files].slice(-6);
+	summary.filePaths = [...files].slice(-6);
+	summary.files = summary.filePaths.map(fileLabel);
 	if (summary.inputTokens) summary.cachedShare = cacheRead / summary.inputTokens;
 	return summary;
 }
