@@ -256,7 +256,7 @@ const introRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-viz-intro-'));
 // Opening the board starts that chat by itself, but only where the hooks can deliver the note.
 assert.equal(walkthroughDue(introRoot), false, 'without hooks the walkthrough would sit unread, so no chat is opened');
 require('../out/data/hooks-install').installHooks(introRoot, path.resolve(__dirname, '..'));
-assert.equal(walkthroughDue(introRoot), true, 'a first open of the board starts Onboarding');
+assert.equal(walkthroughDue(introRoot), true, 'a first open of the board starts the Extension Assistant');
 assert.equal(walkthroughDue(introRoot), false, 'and a second webview does not open another');
 assert.ok(
 	fs.existsSync(path.join(runtimeDir(introRoot), 'intro-shown')),
@@ -264,14 +264,14 @@ assert.ok(
 );
 
 const intro = takeIntroNote();
-assert.match(intro, /I'm Onboarding/, 'the walkthrough opens by naming Onboarding');
-assert.doesNotMatch(intro, /wearing the \w+ persona/, 'and never asks Onboarding to read out an internal persona id');
+assert.match(intro, /I'm the Extension Assistant/, 'the walkthrough opens by naming the Extension Assistant');
+assert.doesNotMatch(intro, /wearing the \w+ persona/, 'and never asks it to read out an internal persona id');
 
 // The walkthrough ends on an offer, not an inventory: the first persona a project owns is the one
 // that reconciles its declared context with the code, and it is written only once the user agrees.
 assert.match(intro, /Project Manager/, 'the walkthrough offers the project manager');
 assert.match(intro, /do not (write|edit) anything|do not edit any files/i, 'and writes nothing on the intro turn');
-assert.match(intro, /If they decline/, 'a no ends it rather than leaving Onboarding to improvise');
+assert.match(intro, /If they decline/, 'a no ends it rather than leaving the Extension Assistant to improvise');
 for (const key of [/^id: project-manager$/m, /^title: Project Manager$/m, /^description: .+$/m]) {
 	// personaFromFile and the identity hook both read these keys; a loose header lands a bare slug.
 	assert.match(intro, key, `the persona charter is dictated with ${key.source}`);
@@ -295,7 +295,7 @@ assert.doesNotMatch(
 assert.equal(takeIntroNote(), null, 'and is offered once per workspace, so later sessions start clean');
 
 // A project that already declares personas gets no offer to build the team it has: the walkthrough
-// reads the roster first, so Onboarding offers the manager only where none owns the job.
+// reads the roster first, so the Extension Assistant offers the manager only where none owns the job.
 const { introNote } = require('../out/data/intro');
 const personaDir = path.join(introRoot, '.cursor', 'personas');
 fs.mkdirSync(personaDir, { recursive: true });
@@ -304,9 +304,8 @@ fs.writeFileSync(
 	'---\nid: frontend\ntitle: Frontend Engineer\nname: Ken\n---\nBuilds the UI.\n'
 );
 const rosterIntro = introNote(introRoot);
-assert.match(rosterIntro, /already declares/, 'the roster it can see is named back to the user');
-assert.match(rosterIntro, /Frontend Engineer/);
-assert.match(rosterIntro, /Ask whether to add it/, 'and the manager is still the one offer');
+assert.match(rosterIntro, /Ask whether to add/, 'and the manager is still the one offer');
+assert.doesNotMatch(rosterIntro, /Frontend Engineer/, 'the assistant does not tour the project team');
 fs.writeFileSync(
 	path.join(personaDir, 'project-manager.md'),
 	'---\nid: project-manager\ntitle: Project Manager\nname: Wendy\n---\nRuns the roster.\n'
@@ -335,12 +334,12 @@ assert.match(spokenIntro, /Board request/, 'the chat hears it as a board request
 assert.match(spokenIntro, /Context Manager/, 'and receives the walkthrough itself');
 
 // The walkthrough rides the first submit as hidden context or not at all: a hello sent before the
-// note was written must not make the end of that turn introduce Onboarding a second time.
+// note was written must not make the end of that turn introduce the Extension Assistant a second time.
 appendHandoff(introRoot, {
 	fromConversationId: 'quick-chat',
 	fromRole: 'guide',
 	to: { kind: 'session', role: 'guide', conversationId: 'quick-chat' },
-	text: 'Introduce yourself as Onboarding.',
+	text: 'Introduce yourself as the Extension Assistant.',
 	submitOnly: true,
 });
 const quietStop = execFileSync('node', [deliverScript], {

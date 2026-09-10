@@ -163,7 +163,7 @@ assert.match(
 	'the chat receives the stable name shown on its roster card'
 );
 
-// The guide must not offer a team the project already has, so its identity carries the roster.
+// The guide must not tour a team the project already has: point at the Project Manager instead.
 const guided = JSON.parse(
 	execFileSync('node', [script], {
 		cwd,
@@ -175,11 +175,11 @@ const guided = JSON.parse(
 		encoding: 'utf8',
 	})
 );
-assert.match(guided.additional_context, /already has a roster/);
-assert.match(guided.additional_context, /Project Manager \(Wendy\)/, 'named as the roster names him');
+assert.match(guided.additional_context, /already has a Project Manager/);
+assert.match(guided.additional_context, /Project Manager \(Wendy\)/, 'named as the roster names them');
 assert.doesNotMatch(
 	guided.additional_context,
-	/propose the Project Manager/,
+	/The one persona you may offer is a Project Manager/,
 	'so the guide points at the manager instead of offering a second one'
 );
 

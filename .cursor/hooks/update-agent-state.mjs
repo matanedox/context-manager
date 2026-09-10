@@ -38,7 +38,7 @@ export const DEFAULT_PERSONA = 'guide';
 
 /** The one title the extension ships. Project personas take theirs from files, not this map. */
 export const PERSONA_TITLES = {
-	guide: 'Onboarding — guides you through the extension and helps you start a team',
+	guide: 'Extension Assistant — onboarding and support for the Context Manager extension',
 };
 
 export function isRoleId(value) {

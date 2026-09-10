@@ -43,7 +43,7 @@ assert.equal(
 	1,
 	'duplicate sessionStart events collapse to one activity row'
 );
-// The project manager leads the project roster; Onboarding stays available for extension support at the end.
+// The project manager leads the project roster; the Extension Assistant stays available for extension support at the end.
 assert.equal(payload.roster[0].role, 'project-manager');
 assert.equal(payload.roster.at(-1).role, 'guide');
 assert.equal(payload.roster.at(-1).dimmed, true);
@@ -67,13 +67,13 @@ assert.deepEqual(
 	['role', 'roleLabel', 'name', 'removable', 'dimmed'],
 	'roster cards carry no live state, so hook refreshes cannot make them flash'
 );
-assert.equal(payload.roster.at(-1).name, undefined, 'Onboarding has a role title, not a baked-in first name');
+assert.equal(payload.roster.at(-1).name, undefined, 'the Extension Assistant has a role title, not a baked-in first name');
 assert.equal(personaName('project-manager'), undefined, 'the project manager has no default first name');
 assert.equal(personaName('project-manager', 'Wendy'), 'Wendy', 'and the persona source is how a project names it');
 assert.equal(personaName('beta'), undefined, 'other personas stay unnamed until their source names them');
 assert.equal(
 	payload.roster.at(-1).roleLabel,
-	'Onboarding',
+	'Extension Assistant',
 	'a card names the role the persona declares, not the capitalised slug of its id'
 );
 assert.ok(
@@ -140,7 +140,7 @@ assert.equal(namedPersona.roleLabel, 'Code Reviewer');
 assert.equal(namedPersona.name, 'SecOps');
 assert.equal(personaDisplay('security').name, undefined);
 assert.equal(
-	personaDisplay('guide', 'Onboarding', 'Onboarding').name,
+	personaDisplay('guide', 'Extension Assistant', 'Extension Assistant').name,
 	undefined,
 	'a name that only repeats the role label is not printed twice'
 );
@@ -175,7 +175,7 @@ assert.equal(claimedPayload.sessions[0].roleLabel, 'Delta', 'the new session kee
 // a chat nobody assigned is the one the hooks inject as the guide, so the rail names that role
 const unassigned = boardState([event('sessionStart', 'walk-in', 0)], roleMap, {}, false);
 const unassignedPayload = payloadFor(unassigned, false, roleMap, 'walk-in', repoContext, Date.now());
-assert.equal(unassignedPayload.sessions[0].roleLabel, 'Onboarding');
+assert.equal(unassignedPayload.sessions[0].roleLabel, 'Extension Assistant');
 assert.equal(unassignedPayload.sessions[0].name, undefined);
 assert.equal(unassignedPayload.selectedRole, 'guide', 'the detail pane agrees with the rail');
 

@@ -3,12 +3,14 @@ import { ScrumBoard } from './host/board';
 import { ScrumBoardProvider, VIEW_ID } from './host/board-provider';
 import { restoreGuide } from './data/personas';
 
-/** A removed Onboarding card leaves nothing to click, so the way back is a command rather than the board. */
+/** A removed Extension Assistant card leaves nothing to click, so the way back is a command rather than the board. */
 function bringBackGuide(board: ScrumBoard): void {
 	const restored = restoreGuide(vscode.workspace.workspaceFolders?.[0]?.uri.fsPath);
 	board.refreshAll();
 	void vscode.window.showInformationMessage(
-		restored ? 'Onboarding is back on the Team roster.' : 'Onboarding is already on the Team roster.'
+		restored
+			? 'Extension Assistant is back on the Team roster.'
+			: 'Extension Assistant is already on the Team roster.'
 	);
 }
 

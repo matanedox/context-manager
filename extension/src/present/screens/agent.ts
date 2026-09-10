@@ -92,7 +92,7 @@ export function buildAgent(snapshot: BoardSnapshot, selection: Selection): Agent
 		`Tool calls: ${summary.toolCalls}`,
 		summary.endReason ? `Ended: ${summary.endReason.replace(/_/g, ' ')}` : '',
 	].filter(Boolean);
-	// A selected chat with no assignment reads as Onboarding, matching the rail and the
+	// A selected chat with no assignment reads as the Extension Assistant, matching the rail and the
 	// identity the hooks inject; the roster's first persona is only the no-selection default.
 	const role = (selected ? (selected.role ?? GUIDE_PERSONA.id) : context.personas[0]?.id) ?? GUIDE_PERSONA.id;
 	const persona = context.personas.find((item) => item.id === role);

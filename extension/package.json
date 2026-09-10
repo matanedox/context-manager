@@ -33,7 +33,7 @@
       },
       {
         "command": "contextManager.restoreGuide",
-        "title": "Context Manager: Restore onboarding"
+        "title": "Context Manager: Restore Extension Assistant"
       },
       {
         "command": "contextManager.removeAll",

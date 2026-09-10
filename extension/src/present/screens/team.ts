@@ -30,10 +30,10 @@ export function buildTeam(snapshot: BoardSnapshot): TeamScreen {
 		roster: personas.map((entry) => ({
 			role: entry.id,
 			...personaDisplay(entry.id, personaName(entry.id, personaDisplayName(entry)), entry.title),
-			// No card is kept against the user's wishes. Onboarding is a preference either way; a project
+			// No card is kept against the user's wishes. The Extension Assistant is a preference either way; a project
 			// persona needs a roster file to be removed from, which the preview roster is not.
 			removable: isGuide(entry.id) || context.personaSource !== 'fallback',
-			// Onboarding stays available for extension setup and support after the project team takes over.
+			// The Extension Assistant stays available for extension setup and support after the project team takes over.
 			dimmed: hasProjectManager && isGuide(entry.id),
 		})),
 	};

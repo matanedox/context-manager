@@ -50,7 +50,7 @@ export function viewModel(snapshot: BoardSnapshot, ui: BoardUi): ViewModel {
 	const { state, usingDemo, context } = snapshot;
 	const selection = selectionOf(snapshot, ui);
 	const { openSessions, selected } = selection;
-	// A chat the board never assigned still runs as Onboarding: that is the persona the
+	// A chat the board never assigned still runs as the Extension Assistant: that is the persona the
 	// hooks inject when a session claims none, so the rail names it instead of showing a blank row.
 	const labeled = (id: Role | null) => {
 		const role = id ?? GUIDE_PERSONA.id;

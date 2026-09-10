@@ -206,7 +206,7 @@ export function dropPersona(role: Role, refresh: () => void): void {
 		refresh();
 		if (isGuide(role)) {
 			void vscode.window.showInformationMessage(
-				'Onboarding is gone. Bring it back with Context Manager: Restore onboarding.'
+				'Extension Assistant is gone. Bring it back with Context Manager: Restore Extension Assistant.'
 			);
 		}
 	});

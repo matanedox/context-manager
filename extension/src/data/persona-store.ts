@@ -107,7 +107,7 @@ export function createPersona(root: string | undefined, input: CreatePersonaInpu
 	}
 
 	const jsonRel = '.cursor/agent-viz/personas.json';
-	// Onboarding belongs to the extension, so it is never written into the project's roster: from the
+	// The Extension Assistant belongs to the extension, so it is never written into the project's roster: from the
 	// fallback the file starts with what the user added and nothing else.
 	const base = source === 'json' ? owned(personas).map(jsonEntry) : [];
 	appendToPersonasJson(path.join(root, jsonRel), [
@@ -117,7 +117,7 @@ export function createPersona(root: string | undefined, input: CreatePersonaInpu
 	return jsonRel;
 }
 
-/** The project's own personas: Onboarding is injected by the extension and owns no file. */
+/** The project's own personas: the Extension Assistant is injected by the extension and owns no file. */
 function owned(personas: Persona[]): Persona[] {
 	return personas.filter((persona) => !isGuide(persona.id));
 }
@@ -166,14 +166,14 @@ function removeFromCharter(file: string, id: Role): void {
 }
 
 /**
- * Drop a persona from the roster source in this workspace. No card is permanent, Onboarding
+ * Drop a persona from the roster source in this workspace. No card is permanent, the Extension Assistant
  * included: an empty board is a state the user asked for, and `+ Add persona` is always there.
  */
 export function removePersona(root: string | undefined, id: Role): boolean {
 	if (!root || !isRole(id)) return false;
 	const { personas, source } = discoverPersonas(root);
 	const mine = owned(personas);
-	// Onboarding owns no file, so sending it away is a preference; restoreGuide brings it back.
+	// The Extension Assistant owns no file, so sending it away is a preference; restoreGuide brings it back.
 	if (isGuide(id)) return dismissGuide(root);
 	if (!mine.some((persona) => persona.id === id)) return false;
 	// Nothing to remove from: the fallback roster is a preview, not a file this project wrote.

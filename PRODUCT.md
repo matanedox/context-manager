@@ -60,7 +60,7 @@ team.
 
 - **Context Manager: Open Board**
 - **Context Manager: Install Agent Hooks In This Workspace**
-- **Context Manager: Restore onboarding**
+- **Context Manager: Restore Extension Assistant**
 - **Context Manager: Remove Agent Hooks And Board Data**
 
 Uninstalling the extension clears `~/.cursor/agent-viz/` on its own; your personas and rules are
@@ -73,36 +73,36 @@ left alone.
 Personas discovered from `.cursor/personas/*.md` (per-file or one charter), else
 `.cursor/agent-viz/personas.json`. **+ Add persona** writes into whichever source is already in use.
 
-**Onboarding** is injected by the extension and leads every roster, alongside the project's own
-personas rather than instead of them. It walks the user through the board and offers the Project
-Manager that maps this project's context into personas — the mapping is that persona's job, not
-Onboarding's. It owns no file: it never lands in `personas.json`. A project that declares a `guide`
-of its own keeps its own wording in that first slot.
+The **Extension Assistant** is injected by the extension and leads every roster, alongside the
+project's own personas rather than instead of them. It owns the extension walkthrough and support
+(Team, Agent, hooks, commands) — not the project team. That is the **Project Manager**, which it
+offers if the project has none. It owns no file: it never lands in `personas.json`. A project that
+declares a `guide` of its own keeps its own wording in that first slot.
 
-It is initial guidance, so it can be removed whenever the user is done with it — dismissed as a
-board preference next to the runtime state, never by touching the repo. No persona is permanent,
-that card included and even when it is the last one: an empty board is a state the user can ask for,
-and **+ Add persona** is always on the roster. Since a removed Onboarding card leaves nothing to click,
-**Context Manager: Restore onboarding** puts it back.
+It can be removed whenever the user is done with it — dismissed as a board preference next to the
+runtime state, never by touching the repo. No persona is permanent, that card included and even when
+it is the last one: an empty board is a state the user can ask for, and **+ Add persona** is always
+on the roster. Since a removed Extension Assistant card leaves nothing to click,
+**Context Manager: Restore Extension Assistant** puts it back.
 
-An unconfigured workspace is left untouched: the roster is Onboarding plus a setup panel, and the
-first file appears only when the user adds a persona.
+An unconfigured workspace is left untouched: the roster is the Extension Assistant plus a setup
+panel, and the first file appears only when the user adds a persona.
 
-The walkthrough happens in the chat, not in a README: the first session started while the board has
-no live activity receives a board request to introduce the board and to offer the persona that maps
-the repo into a team, delivered over the same handoff pipeline as any other note. That chat opens
-with a short hello prefilled in its composer and unsent, so the user starts the walkthrough rather
-than the board taking a turn on its own. Once per workspace, hooks required.
+The walkthrough happens in the chat, not in a README: the first session started from Team while
+hooks are ready receives a request to introduce the **extension** (Team and Agent) and, if needed,
+offer a Project Manager who will show the project team. That chat opens with a short hello
+prefilled in its composer and unsent, so the user starts the walkthrough rather than the extension
+taking a turn on its own. Once per workspace, hooks required.
 
-Onboarding closes that walkthrough with one offer: a **Project Manager**, the first persona the
-project owns. It does the mapping against the code rather than from the markdown alone — reading the
-declared context and the repo's actual shape, reporting where the two disagree, and proposing a
-roster only the user approves into files. Declining writes nothing and is not asked again. Display
-names belong in the persona files the project writes, not in the extension.
+The Extension Assistant closes that walkthrough with one offer: a **Project Manager**. That persona
+shows and runs the project team — mapping against the code, delegation, the roster — and is written
+only once the user agrees. The assistant does not list or explain the project's personas. Declining
+writes nothing and is not asked again. Display names belong in the persona files the project writes,
+not in the extension.
 
 ### 2. Scrum board (extension webview)
 
-- **Roster** — figure per declared role (Onboarding, plus any personas the project adds).
+- **Roster** — figure per declared role (Extension Assistant, plus any personas the project adds).
 - **Handoff panel** — collaborator targets from the persona charter, and the note you send one.
 - **Live pulse** — role/subagent highlights on hook events.
 - **Activity log** — tail of the session event log (who did what, when).

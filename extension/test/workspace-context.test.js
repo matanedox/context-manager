@@ -82,10 +82,10 @@ const fromDisk = discoverPersonas(personaRoot);
 assert.deepEqual(
 	fromDisk.personas.map((persona) => persona.id),
 	['guide', 'beta'],
-	"the extension's Onboarding card leads the project's own personas"
+	"the extension's Extension Assistant card leads the project's own personas"
 );
-assert.equal(fromDisk.source, 'personas', 'Onboarding does not make the roster look invented');
-assert.equal(personaCharterPath(personaRoot, 'guide'), null, 'Onboarding has no charter to open');
+assert.equal(fromDisk.source, 'personas', 'the Extension Assistant does not make the roster look invented');
+assert.equal(personaCharterPath(personaRoot, 'guide'), null, 'the Extension Assistant has no charter to open');
 const scanned = workspaceContext(personaRoot);
 const betaCtx = contextForPersona(scanned, 'beta');
 assert.equal(
@@ -225,7 +225,7 @@ const charterCtx = workspaceContext(charterRoot);
 assert.deepEqual(
 	charterCtx.personas.map((persona) => persona.id),
 	['guide', 'alpha', 'beta', 'gamma'],
-	"a single charter file yields every role it lists, behind the extension's Onboarding card"
+	"a single charter file yields every role it lists, behind the extension's Extension Assistant card"
 );
 assert.equal(charterCtx.personaSource, 'charter');
 assert.equal(
@@ -267,7 +267,7 @@ assert.deepEqual(
 	'no session open means no persona tab'
 );
 // A persona file that names itself in frontmatter is one persona, however many sections its charter
-// body has: Onboarding wrote exactly this file and the board showed a card per heading instead.
+// body has: the Extension Assistant wrote exactly this file and the board showed a card per heading instead.
 const sectionedPersona = [
 	'---',
 	'id: project-manager',
@@ -344,7 +344,7 @@ assert.equal(fromJson.source, 'json');
 assert.deepEqual(
 	fromJson.personas.map((persona) => persona.id),
 	['guide', 'security'],
-	'Onboarding leads the roster without being written into personas.json'
+	'the Extension Assistant leads the roster without being written into personas.json'
 );
 assert.deepEqual(
 	JSON.parse(fs.readFileSync(path.join(fallbackRoot, '.cursor', 'agent-viz', 'personas.json'), 'utf8')).map(
@@ -424,7 +424,7 @@ assert.match(
 );
 fs.rmSync(addCharterRoot, { recursive: true, force: true });
 
-// Onboarding is initial guidance, so a project with a roster of its own can send it away — and the
+// The Extension Assistant can be sent away — and the
 // board remembers that outside the repo, since it was never a file in it.
 const dismissRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-viz-dismiss-'));
 fs.mkdirSync(path.join(dismissRoot, '.cursor', 'personas'), { recursive: true });
@@ -432,20 +432,20 @@ fs.writeFileSync(
 	path.join(dismissRoot, '.cursor', 'personas', 'beta.md'),
 	'---\nid: beta\ntitle: Beta\ndescription: from disk\n---\n'
 );
-assert.equal(removePersona(dismissRoot, 'guide'), true, 'Onboarding can be sent away');
+assert.equal(removePersona(dismissRoot, 'guide'), true, 'the Extension Assistant can be sent away');
 assert.deepEqual(
 	discoverPersonas(dismissRoot).personas.map((persona) => persona.id),
 	['beta'],
-	'a dismissed Onboarding card stays gone across reads'
+	'a dismissed Extension Assistant card stays gone across reads'
 );
 assert.deepEqual(
 	fs.readdirSync(path.join(dismissRoot, '.cursor', 'personas')),
 	['beta.md'],
-	'dismissing Onboarding writes nothing into the project'
+	'dismissing the Extension Assistant writes nothing into the project'
 );
 fs.rmSync(dismissRoot, { recursive: true, force: true });
 
-// No persona is kept against the user's wishes, so Onboarding goes even when it is the only card and
+// No persona is kept against the user's wishes, so the Extension Assistant goes even when it is the only card and
 // the board is left empty. It is a preference rather than a file, so there is a way back.
 const guideOnlyRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-viz-guide-only-'));
 assert.equal(removePersona(guideOnlyRoot, 'guide'), true, "the last card is still the user's to drop");
@@ -454,13 +454,13 @@ assert.deepEqual(
 	[],
 	'an emptied board shows no roster rather than reviving one'
 );
-assert.equal(restoreGuide(guideOnlyRoot), true, 'and Onboarding can be asked back');
+assert.equal(restoreGuide(guideOnlyRoot), true, 'and the Extension Assistant can be asked back');
 assert.deepEqual(
 	discoverPersonas(guideOnlyRoot).personas.map((persona) => persona.id),
 	['guide'],
 	'which puts it at the head of the roster again'
 );
-assert.equal(restoreGuide(guideOnlyRoot), false, 'restoring Onboarding that never left is a no-op');
+assert.equal(restoreGuide(guideOnlyRoot), false, 'restoring the Extension Assistant that never left is a no-op');
 fs.rmSync(guideOnlyRoot, { recursive: true, force: true });
 
 const removeJsonRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-viz-remove-json-'));

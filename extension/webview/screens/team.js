@@ -29,7 +29,7 @@ function renderRoster(payload) {
 		.map(
 			(item) => `<div class="figure-wrap${item.dimmed ? ' dimmed' : ''}">
         <button class="figure" data-role="${escapeHtml(item.role)}" type="button" title="${escapeHtml(
-			item.dimmed ? 'Onboarding — extension setup and support' : item.role
+			item.dimmed ? 'Extension Assistant — extension setup and support' : item.role
 		)}">
           ${ROBOT_SVG}${personaFigureCopy(item)}</button>${
 				item.removable

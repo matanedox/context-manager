@@ -21,7 +21,7 @@ Copies under `extension/hooks/` are publish artifacts. Change the source in `.cu
 ## Does not own
 
 - `extension/src/` and `extension/webview/` — Nia's.
-- `.cursor/personas/` — Bill's roster. Never write Onboarding into the project's persona files.
+- `.cursor/personas/` — Bill's roster. Never write the Extension Assistant into the project's persona files.
 
 ## Handoffs
 

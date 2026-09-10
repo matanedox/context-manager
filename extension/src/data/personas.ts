@@ -1,4 +1,4 @@
-/** Persona discovery: one file per persona, a multi-role charter, JSON, then Onboarding. */
+/** Persona discovery: one file per persona, a multi-role charter, JSON, then the Extension Assistant. */
 import * as fs from 'fs';
 import * as path from 'path';
 import { frontmatter, markdownFiles, metaValue, slugify } from './md';
@@ -19,17 +19,17 @@ export type PersonaSource = 'personas' | 'charter' | 'json' | 'fallback';
 
 /**
  * The one persona the extension brings itself, first in every roster and never written to disk: it
- * walks the user through the extension and offers the Project Manager that turns the rules, skills
- * and instructions already in the repo into real personas. A project with no roster has only this.
+ * walks the user through the extension and, if needed, offers the Project Manager that owns the
+ * project team. A project with no roster has only this.
  */
 export const GUIDE_PERSONA: Persona = {
 	id: 'guide',
-	title: 'Onboarding',
-	description: 'guides you through the extension and helps you start a team',
+	title: 'Extension Assistant',
+	description: 'onboarding and support for the Context Manager extension — Team, Agent, hooks, walkthrough',
 	references: [],
 };
 
-/** Dismissing Onboarding is a board preference, so it lives with the runtime state, not in the repo. */
+/** Dismissing the Extension Assistant is a board preference, so it lives with the runtime state, not in the repo. */
 function dismissalMarker(root: string): string {
 	return path.join(runtimeDir(root), 'guide-dismissed');
 }
@@ -38,7 +38,7 @@ export function guideDismissed(root: string | undefined): boolean {
 	return !!root && fs.existsSync(dismissalMarker(root));
 }
 
-/** Onboarding is initial guidance: it can be sent away at any point, roster or not. */
+/** The Extension Assistant can be sent away at any point, roster or not. */
 export function dismissGuide(root: string): boolean {
 	try {
 		fs.mkdirSync(runtimeDir(root), { recursive: true });
@@ -49,7 +49,7 @@ export function dismissGuide(root: string): boolean {
 	}
 }
 
-/** The way back, since a removed Onboarding card leaves nothing to click: it is a preference, not a file. */
+/** The way back, since a removed Extension Assistant card leaves nothing to click: it is a preference, not a file. */
 export function restoreGuide(root: string | undefined): boolean {
 	if (!root || !guideDismissed(root)) return false;
 	try {
@@ -238,7 +238,7 @@ export function personaDisplayName(persona: Pick<Persona, 'id' | 'title' | 'name
 }
 
 /**
- * Keeps the first position but the last definition, which is what puts Onboarding at the
+ * Keeps the first position but the last definition, which is what puts the Extension Assistant at the
  * head of every roster while letting a project that declares a `guide` of its own keep its wording.
  */
 function dedupe(personas: Persona[]): Persona[] {
