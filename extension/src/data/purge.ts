@@ -101,11 +101,18 @@ export function openConversationIds(
 	return sessions.filter((session) => session.status !== 'closed').map((session) => session.conversationId);
 }
 
-/** Everything this workspace ever stored, preferences included: the uninstall path. */
+/**
+ * Everything this workspace ever stored, preferences included: the uninstall path. The contents
+ * go, the directory stays: `BoardWatcher` holds an `fs.watch` handle on it, and Windows leaves a
+ * watched directory that is removed in a delete-pending state whose name can be neither opened nor
+ * recreated — so every later hook write and every persona click failed with EPERM until a reload.
+ */
 export function removeRuntimeState(root: string | undefined): void {
 	if (!root) return;
 	try {
-		fs.rmSync(runtimeDir(root), { recursive: true, force: true });
+		for (const entry of fs.readdirSync(runtimeDir(root))) {
+			fs.rmSync(runtimeFile(root, entry), { recursive: true, force: true });
+		}
 	} catch {
 		/* nothing left to report: the board reads it as an empty workspace either way */
 	}

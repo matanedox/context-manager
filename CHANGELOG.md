@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.7
+
+Install / Repair could leave the board unable to save anything, on Windows.
+
+The reset behind it deleted the directory the board keeps its session state in — while the board's
+own file watcher still had that directory open. Windows answers that by leaving the name behind in a
+state nothing can open or recreate, so every write that followed failed: no event log, no persona
+identity, and a Team screen showing the bundled demo. Clicking a persona then opened a chat Cursor
+never told the board about, warned that no chat was opened, and cleared the session — every time,
+until the window was reloaded.
+
+A reset now empties that directory instead of removing it, which leaves the watcher's handle valid
+and nothing wedged behind. It clears exactly what it cleared before, macOS and Linux included.
+
+**Upgrading:** if a board is already stuck showing demo rows with persona clicks doing nothing,
+reload the window once — that releases the old handle.
+
 ## 0.2.6
 
 Hooks no longer depend on how Cursor was launched.

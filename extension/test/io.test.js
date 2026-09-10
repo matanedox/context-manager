@@ -33,7 +33,7 @@ const {
 	purgeConversation,
 	removeRuntimeState,
 } = require('../out/data/purge');
-const { runtimeFile } = require('../out/data/runtime-dir');
+const { runtimeDir, runtimeFile } = require('../out/data/runtime-dir');
 const { payloadFor, repoContext, roleMap } = require('./fixtures');
 
 // Closing from the board deletes that conversation's data rather than logging an end event, so
@@ -107,6 +107,9 @@ assert.deepEqual(openConversationIds(rows, false), ['live'], 'a reset archives o
 assert.deepEqual(openConversationIds(rows, true), [], 'demo rows name no chat to archive');
 removeRuntimeState(reset);
 assert.equal(fs.existsSync(runtimeFile(reset, 'events.jsonl')), false, 'a reset clears every saved board file');
+// The watcher holds this directory open, and removing a watched directory on Windows leaves a name
+// that can neither be opened nor recreated: the reset empties it and leaves it in place.
+assert.equal(fs.readdirSync(runtimeDir(reset)).length, 0, 'and leaves the watched directory itself, empty');
 
 // a click Cursor never turned into a session expires instead of wedging the board
 writePendingRole(tmp, 'gamma', 0);

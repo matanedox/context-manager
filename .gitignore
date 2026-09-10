@@ -8,5 +8,6 @@ extension/dist/
 .DS_Store
 # Context Manager (installed hook copies)
 .cursor/hooks.json
+.cursor/hooks/log-agent-event.mjs
 .cursor/hooks/update-agent-state.mjs
 .cursor/hooks/resolve-persona-context.mjs
